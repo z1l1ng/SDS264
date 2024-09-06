@@ -15,7 +15,7 @@ You can download this .qmd file from [here](https://github.com/proback/264_fall_
 #| include: false
 
 library(tidyverse)
-vaccine_data <- read_csv("https://proback.github.io/264_fall_2024/Data/vaccinations_2021.csv")
+# vaccine_data <- read_csv("https://proback.github.io/264_fall_2024/Data/vaccinations_2021.csv")
 ```
 
 First, a little detour to describe several alternatives for reading in data:
@@ -38,6 +38,11 @@ vaccine_data <- read_csv("https://proback.github.io/264_fall_2024/Data/vaccinati
 vaccine_data <- read_csv("https://raw.githubusercontent.com/proback/264_fall_2024/main/Data/vaccinations_2021.csv")  #<4>
 
 ```
+
+```{r}
+vaccine_data <- read_csv("/Users/zilingzhen/SDS264/Data/vaccinations_2021.csv")
+```
+
 
 1. Approach 1: create a Data folder in the same location where this .qmd file resides, and then store vaccinations_2021.csv in that Data folder
 2. Approach 2: give R the complete path to the location of vaccinations_2021.csv, starting with Home (~)
@@ -74,7 +79,7 @@ vaccine_data |>
   geom_point() +
   geom_smooth(se = FALSE) +
   labs(x = "Percent of Votes for Biden in County", 
-       y = "Percent of Country Fully Vaccinated From Covid", 
+       y = "Percent of County Fully Vaccinated From Covid", 
        color = "State")
 ```
 
@@ -89,10 +94,10 @@ vaccine_data |>
   geom_point() +
   geom_smooth(se = FALSE) +
     labs(x = "Percent of Votes for Biden in County", 
-       y = "Percent of Country Fully Vaccinated From Covid")
+       y = "Percent of County Fully Vaccinated From Covid")
 ```
-FINISH LATER
-I prefer the second graph because I can see the data better after using facet wrap. From my preferred plot we can see that all states see a postive trend line with the higher percentage of votes for Biden the higher percentage that the county is fully vaccinated from Covid. Iowa, Minnesota, and Wisconsin have super similar trends as in the minimum of....
+
+I prefer the second graph because I can see the data better after using facet wrap. Personally, after more than 3 or 4 states with the smoothers makes it a little but hard to see and interpret. From my preferred plot we can see that all states see a positive trend line with the higher percentage of votes for Biden the higher percentage that the county is fully vaccinated from Covid. Iowa, Minnesota, and Wisconsin have super similar trends where there is somewhat a upward cluster in the 25%-50% of votes for Biden and 40%-60% percent fully vaccinated. Where as for North Dakota there is a steeper trend line however a majority of the counties are below 45% fully vaccination rates and onlytwo counties have more than 50% of the county vote for Biden with those vaccination rates being 40% and 55%.
 
 2. We wish to compare the proportions of counties in each region with median household income above the national median ($69,560).
 ```{r}

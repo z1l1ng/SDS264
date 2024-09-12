@@ -82,7 +82,7 @@ head(us_states)
 us_states |>
   ggplot(mapping = aes(x = long, y = lat,
                           group = group)) + 
-  geom_polygon(fill = "white", color = "black")
+  geom_polygon(fill = "white", color = "blue")
 ```
 
 **[Pause to ponder:]** What might the `group` and `order` columns represent?

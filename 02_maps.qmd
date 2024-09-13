@@ -115,7 +115,7 @@ vacc_mar13 |>
 us_states |>
   anti_join(vacc_mar13, by = c("region" = "State")) |>
   count(region)
-1```
+```
 
 **[Pause to ponder:]** What did we learn by running `anti_join()` above?
 
@@ -292,7 +292,7 @@ leaflet() |>
 
 **[Pause to ponder:]** List similarities and differences between leaflet plots and ggplots.
 
-
+Similarities & Differences 
 
 ### Interactive choropleth maps with leaflet
 
@@ -350,12 +350,12 @@ pal <- colorBin("YlOrRd", domain = states$density, bins = bins)
 library(htmltools)
 library(glue)
 
-states <- states |>
-  mutate(labels = str_c(name, ": ", density, " people / sq mile"))
+# states <- states |>
+#   mutate(labels = str_c(name, ": ", density, " people / sq mile"))
 
-# If want more HTML formatting, use these lines instead of those above:
-#states <- states |>
-#  mutate(labels = glue("<strong>{name}</strong><br/>{density} people / #mi<sup>2</sup>"))
+#If want more HTML formatting, use these lines instead of those above:
+states <- states |>
+ mutate(labels = glue("<strong>{name}</strong><br/>{density} people / #mi<sup>2</sup>"))
 
 labels <- lapply(states$labels, HTML)
 
@@ -422,6 +422,24 @@ R code hints:
 
 
 Data wrangling:
+
+```{r}
+state_data <- state_data |>
+  mutate(state_name = str_squish(str_to_lower(as.character(state)))) |>
+  select(-state)
+
+#polisci_static <- 
+  us_states |>
+  mutate(region = str_squish(region)) |>
+  left_join(state_data, by = c("region" = "state_name")) |>
+  select(region) |>
+    distinct()
+
+polisci_interact <- states |>
+  mutate(name = str_to_lower(name)) |>
+  left_join(state_data, by = c("name" = "state_name")) |>
+  filter(!(name %in% c("alaska", "hawaii", "puerto rico")))
+```
 
 ```{r}
 

@@ -227,7 +227,7 @@ vaccine_data |>
     geom_point(aes(x = IQR_Biden, y = big_states))
 ```
 
-**ANSWER** 
+  
 From this plot we can make the conclusion that in the states with a larger IQR, there are counties that vary with the % of people in that county that voted for Biden. Opposed the the sates with a smaller IQR, such as Tennessee or Missouri which means that the counties have more similar % of people in that county that voted for Biden.
 
 6.  In this question we will focus only on the 12 states in the Midwest (i.e. where region == "Midwest").
@@ -242,7 +242,7 @@ a)  Create a tibble with the following information for each state. Order states 
 -   proportion of Metro counties
 -   median unemployment rate
 
-**ANSWER**
+ 
 ```{r}
 midwest_info <- vaccine_data |>
   filter(region == "Midwest") |>
@@ -258,7 +258,7 @@ midwest_info
 
 b)  Use your tibble in (a) to produce a plot of the relationship between proportion of Metro counties and median unemployment rate. Points should be colored by the number of different `rural_urban_code`s in a state, but a single linear trend should be fit to all points. What can you conclude from the plot?
 
-**ANSWER**
+ 
 ```{r}
 midwest_info |> 
   mutate(rural_urban_rep_fac = as.factor(rural_urban_rep)) |>
@@ -287,6 +287,8 @@ Here are the hypothetical variables:
 -   perc_over_65 = percent of residents over 65 years old
 -   perc_white = percent of residents who identify as white
 
+
+
 8.  Hypothetical R chunk #1:
 
 ```{r}
@@ -304,7 +306,7 @@ temp <- vaccine_data |>
 
 a)  Describe the tibble `temp` created above. What would be the dimensions? What do rows and columns represent?
 
-**ANSWER**
+ 
 Dimensions: 3 rows and 4 columns
 new_perc_vac - removes all counties of over 95% vacc rate, makes them NA
 MD_group - each row is a grouping of people per doctor, either a 1 2 or 3
@@ -315,17 +317,17 @@ Columns:
 
 b)  What would happen if we replaced `new_perc_vac = ifelse(perc_complete_vac > 95, NA, perc_complete_vac)` with `new_perc_vac = ifelse(perc_complete_vac > 95, perc_complete_vac, NA)`?
 
-**ANSWER** 
+  
 It would keep all perc_complete_vac that are greater than 95 and then set all other values to NA.
 
 c)  What would happen if we replaced `mean_white = mean(perc_white, na.rm = TRUE)` with `mean_white = mean(perc_white)`?
 
-**ANSWER** 
+  
 It will not be able to calculate the means. Means would be NA.
 
 d)  What would happen if we removed `group_by(MD_group)`?
 
-**ANSWER** 
+  
 If we removed it, then it would not group by the 3 split groups, for summary statistics (mean) would do for the entire dataset and we would have 1 row
 
 ```{=html}
@@ -356,12 +358,12 @@ vaccine_data |>
 
 a)  Why would the first plot produce an error?
 
-**ANSWER** 
+  
 The first plot would produce an error because geom_smooth() doesn't have anything inside of it. There would be trouble computing that layer since the aes only are "set" for geom_point. geom_smooth doesn't know what to plot for the x and y.
 
 b)  Describe the tibble `temp` created above. What would be the dimensions? What do rows and columns represent?
 
-**ANSWER** 
+  
 Dimensions: 3 rows and 2 columns 
 Top 3 rows of the HR_Party, represents the party that shows up the most after the summarize
 
@@ -371,7 +373,7 @@ Columns:
 
 c)  What would happen if we replaced `fct_reorder(HR_party, perc_over_65, .fun = median)` with `HR_party`?
 
-**ANSWER** 
+  
 It wouldn't order HR_party based of the median of percent is over 65 years old, but order based on HR_party, which would now appear in the order that it appears in the dataset. 
 
 
@@ -396,7 +398,7 @@ vaccine_data |>
 
 a)  Describe the tibble piped into the ggplot above. What would be the dimensions? What do rows and columns represent?
 
-**ANSWER** 
+  
 Dimensions: min 5 rows, max 45 rows, 3 columns.
 Rows will be the 4 states that show up the most with an "Other", and their respective combinations with the rural_urban_code
 Columns:
@@ -406,15 +408,15 @@ Columns:
 
 b)  Carefully describe the plot created above.
 
-**ANSWER** 
+  
 The plot uses rural_urban_code as the x axis, (so 1-9) and then mean_people_per_MD as the y axis. Different colored lines per state_lump and rural_urban code. The colors of the lines are ordered by state_lump, then rural_urban_code, then mean_people_per_MD. 
 
 c)  What would happen if we removed `filter(!is.na(people_per_MD))`?
 
-**ANSWER** 
+  
 The NA values will not be removed. We would have trouble in the summarize when we tried to find the mean of people_per_md.
 
 d)  What would happen if we replaced `fct_reorder2(state_lump, rural_urban_code, mean_people_per_MD)` with `state_lump`?
 
-**ANSWER** 
+  
 It would order it in the original order of state_lump, the order that it appears in the dataset. The lines would not be colored soley on the state_lump and not take into account order of mean and rural_urban_code

@@ -426,14 +426,23 @@ Data wrangling:
 ```{r}
 state_data <- state_data |>
   mutate(state_name = str_squish(str_to_lower(as.character(state)))) |>
-  select(-state)
-
-#polisci_static <- 
+  select(state_name, cig_tax12_3, uninsured_pct)
+         
+polisci_static <- 
   us_states |>
   mutate(region = str_squish(region)) |>
-  left_join(state_data, by = c("region" = "state_name")) |>
-  select(region) |>
-    distinct()
+  mutate(region = ifelse(region == "district of columbia", "districtofcolumbia", region)) |>
+  mutate(region = ifelse(region == "new hampshire", "newhampshire", region)) |>
+  mutate(region = ifelse(region == "new jersey", "newjersey", region)) |>
+  mutate(region = ifelse(region == "new mexico", "newmexico", region)) |>
+  mutate(region = ifelse(region == "new york", "newyork", region)) |>
+  mutate(region = ifelse(region == "north carolina", "northcarolina", region)) |>
+  mutate(region = ifelse(region == "north dakota", "northdakota", region)) |>
+  mutate(region = ifelse(region == "rhode island", "rhodeisland", region)) |>
+  mutate(region = ifelse(region == "south carolina", "southcarolina", region)) |>
+  mutate(region = ifelse(region == "south dakota", "southdakota", region)) |>
+  mutate(region = ifelse(region == "west virginia", "westvirginia", region)) |>
+  left_join(state_data, by = c("region" = "state_name"))
 
 polisci_interact <- states |>
   mutate(name = str_to_lower(name)) |>
@@ -441,15 +450,19 @@ polisci_interact <- states |>
   filter(!(name %in% c("alaska", "hawaii", "puerto rico")))
 ```
 
-```{r}
-
-```
-
 
 Numeric variable (static plot):
 
 ```{r}
-
+polisci_static |>
+ggplot(aes(x = long, y = lat,
+                          group = group)) + 
+  geom_polygon(aes(fill = uninsured_pct), color = "black") + 
+  labs() +
+  coord_map() +  
+  theme_void() +
+  labs(title = "Percentage Without Health Insurance (2012) by States",
+       fill = "Percentage") 
 ```
 
 

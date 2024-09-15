@@ -1,0 +1,105 @@
+---
+title: "Mini Project #1"
+sidebar: false
+format:
+  html: default
+  pdf: default
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+# Load in libraries
+library(tidyverse)
+library(maps)
+library(viridis)
+library(statebins)
+library(leaflet)
+library(sf)
+library(htmltools)
+library(glue)
+```
+
+```{r}
+# Load in datasets
+decennial_census10 <- read_csv("Data/DECENNIALCD1162010.P1-Data.csv")
+
+decennial_census20 <- read_csv("Data/DECENNIALCD1182020.P1-Data.csv")
+
+```
+
+```{r}
+# Load in states sf
+states <- read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson")  #<2>
+states
+```
+
+```{r}
+# Data wrangling
+census_sf <- decennial_census10 |>
+  left_join(decennial_census20, join_by(NAME)) |>
+  rename(name = NAME,
+         population20 = P1_001N,
+         population10 = P001001) |>
+  select(name, population10, population20) |>
+  filter(!(name %in% c("Alaska", "Hawaii", "District of Columbia", "Puerto Rico", "Label for GEO_ID"))) |>
+  mutate(population10 = as.double(population10),
+         population20 = as.double(population20),
+         perc_change = (population20 - population10)/abs(population10) * 100) |>
+  left_join(states, join_by(name)) |>
+  st_as_sf()
+```
+
+```{r}
+# First static plot
+  ggplot(census_sf) +
+  geom_sf(aes(fill = perc_change)) +
+  scale_fill_gradient2(
+    high = "#2aab32", 
+    mid = "white",
+    low = "red",
+    limits = c(-15, 20)) +
+  labs(title = "Percentage Change in Population of the US from 2010 to 2020",
+       fill = "Percent Change",
+       caption = " Source: data.census.gov")
+
+# Remember to write alt-text to describe
+```
+
+```{r}
+# First interactive plot
+bins <- c(-20, -15, -10, -5, 0, 5, 10, 15, 20)
+my_scale <- colorRamp(c("red", "white", "#2aab32"), interpolate="linear")
+pal <- colorBin(palette = my_scale, domain = census_sf$perc_change, bins = bins)
+
+census_sf <- census_sf |>
+ mutate(labels = str_c(name, ": ", perc_change, "% Change in Population"))
+labels <- lapply(census_sf$labels, HTML)
+
+leaflet(census_sf) |>
+  setView(-96, 37.8, 4) |>
+  addTiles() |>
+  addPolygons(
+    weight = 2,
+    opacity = 1,
+    color = "black",
+    fillColor = ~ pal(census_sf$perc_change),
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto")) |>
+  addLegend(pal = pal, values = ~census_sf$perc_change, 
+            opacity = 0.7, title = "% Change", position = "bottomright") |>
+  addControl("<h4>Percentage Change in Population of The US, 2010 to 2020</h4>", position = "topright", className = "map-title")
+# Remember to write alt-text to describe
+```
+

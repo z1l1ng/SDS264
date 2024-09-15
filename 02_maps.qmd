@@ -350,12 +350,12 @@ pal <- colorBin("YlOrRd", domain = states$density, bins = bins)
 library(htmltools)
 library(glue)
 
-# states <- states |>
-#   mutate(labels = str_c(name, ": ", density, " people / sq mile"))
+states <- states |>
+  mutate(labels = str_c(name, ": ", density, " people / sq mile"))
 
 #If want more HTML formatting, use these lines instead of those above:
-states <- states |>
- mutate(labels = glue("<strong>{name}</strong><br/>{density} people / #mi<sup>2</sup>"))
+# states <- states |>
+#  mutate(labels = glue("<strong>{name}</strong><br/>{density} people / #mi<sup>2</sup>"))
 
 labels <- lapply(states$labels, HTML)
 
@@ -446,8 +446,24 @@ polisci_static <-
 
 polisci_interact <- states |>
   mutate(name = str_to_lower(name)) |>
+  mutate(name = str_squish(name)) |>
+  mutate(name = ifelse(name == "district of columbia", "districtofcolumbia", name)) |>
+  mutate(name = ifelse(name == "new hampshire", "newhampshire", name)) |>
+  mutate(name = ifelse(name == "new jersey", "newjersey", name)) |>
+  mutate(name = ifelse(name == "new mexico", "newmexico", name)) |>
+  mutate(name = ifelse(name == "new york", "newyork", name)) |>
+  mutate(name = ifelse(name == "north carolina", "northcarolina", name)) |>
+  mutate(name = ifelse(name == "north dakota", "northdakota", name)) |>
+  mutate(name = ifelse(name == "rhode island", "rhodeisland", name)) |>
+  mutate(name = ifelse(name == "south carolina", "southcarolina", name)) |>
+  mutate(name = ifelse(name == "south dakota", "southdakota", name)) |>
+  mutate(name = ifelse(name == "west virginia", "westvirginia", name)) |>
   left_join(state_data, by = c("name" = "state_name")) |>
-  filter(!(name %in% c("alaska", "hawaii", "puerto rico")))
+  filter(!(name %in% c("alaska", "hawaii", "districtofcolumbia")))
+
+polisci_polygon <- states_polygon |>
+  left_join(polisci_data, by = c("region" = "state"))
+polisci_polygon
 ```
 
 
@@ -469,7 +485,37 @@ ggplot(aes(x = long, y = lat,
 Numeric variable (interactive plot):
 
 ```{r}
-# it's okay to skip a legend here
+#for legend
+bins <- c(0, 5, 10, 15, 20, 25, 30, 35, 40)
+pal <- colorBin("Greens", domain = polisci_interact$uninsured_pct, bins = bins)
+
+polisci_interact <- polisci_interact |>
+ mutate(labels = str_c(name, ": ", uninsured_pct, "% people uninsured"))
+labels <- lapply(polisci_interact$labels, HTML)
+
+leaflet(polisci_interact) %>%
+  setView(-96, 37.8, 4) %>%
+  addTiles() %>%
+  addPolygons(
+    fillColor = ~pal(uninsured_pct),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto")) %>%
+  addLegend(pal = pal, values = ~uninsured_pct, opacity = 0.7, title = NULL,
+    position = "bottomright")
 ```
 
 
@@ -477,6 +523,14 @@ Categorical variable (static plot):
 
 ```{r}
 # be really careful with matching color order to factor level order
+polisci_static |>
+ggplot(aes(x = long, y = lat,
+                          group = group)) + 
+  geom_polygon(aes(fill = cig_tax12_3), color = "black") + 
+  labs() +
+  coord_map() +  
+  theme_void() +
+  labs(fill = "Cigarette Tax") 
 ```
 
 
@@ -484,4 +538,35 @@ Categorical variable (interactive plot):
 
 ```{r}
 # may use colorFactor() here
+polisci_interact <- polisci_interact |>
+ mutate(labels = str_c(name, ": ", cig_tax12_3, " Cigarette Tax"))
+labels <- lapply(polisci_interact$labels, HTML)
+
+levels(polisci_interact$cig_tax12_3)
+factpal <- colorFactor(c("blue", "red", "green"),
+                       levels(polisci_interact$cig_tax12_3))
+
+leaflet(polisci_interact) |>
+  setView(-96, 37.8, 4) |>
+  addTiles() |>
+  addPolygons(
+    weight = 2,
+    opacity = 1,
+    color = "black",
+    fillColor = ~ factpal(polisci_interact$cig_tax12_3),
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto")) |>
+  addLegend(pal = factpal, values = ~polisci_interact$cig_tax12_3, 
+            opacity = 0.7, title = NULL, position = "bottomright")
 ```

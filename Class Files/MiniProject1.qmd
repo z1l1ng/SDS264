@@ -50,20 +50,6 @@ census_sf <- decennial_census10 |>
   left_join(states, join_by(name)) |>
   st_as_sf()
 
-
-marijuana_laws2024_sf <- marijuana_laws2024 |>
-  mutate(legality = ifelse(LegalStatus == "Mixed" & Medicinal == "Yes" & Decriminalized == "No", "Medicinal, not decriminalized", LegalStatus),
-         legality = ifelse(LegalStatus == "Mixed" & Medicinal == "Yes" & Decriminalized == "Yes", "Medicinal, and decriminalized", legality),
-         legality = ifelse(LegalStatus == "Mixed" & Medicinal == "CBD Oil Only" & Decriminalized == "No", "CBD Oil Only, not decriminalized", legality),
-         legality = ifelse(LegalStatus == "Mixed" & Medicinal == "CBD Oil Only" & Decriminalized == "Yes", "CBD Oil Only, and decriminalized", legality),
-         legality = ifelse(LegalStatus == "Legalized" & Decriminalized == "Yes", "Legalized, and decriminalized", legality),
-         legality = ifelse(LegalStatus == "Legalized" & Decriminalized == "No", "Legalized, not decriminalized", legality),
-         legality = ifelse(LegalStatus == "Fully Illegal" & Decriminalized == "No", "Fully Illegal, not decriminalized", legality),
-         legality = ifelse(LegalStatus == "Fully Illegal" & Decriminalized == "Yes", "Fully Illegal, and decriminalized", legality)) |>
-  rename(name = state) |>
-  filter(!(name %in% c("Alaska", "Hawaii", "District of Columbia", "Puerto Rico"))) |>
-  left_join(states, join_by(name)) |>
-  st_as_sf()
 ```
 
 ```{r}
@@ -121,10 +107,29 @@ leaflet(census_sf) |>
 ```
 
 ```{r}
+# Data wrangling pt. 2
+marijuana_laws2024_sf <- marijuana_laws2024 |>
+  mutate(legality = ifelse(LegalStatus == "Mixed" & Medicinal == "Yes" & Decriminalized == "No", "Medicinal, not decriminalized", LegalStatus),
+         legality = ifelse(LegalStatus == "Mixed" & Medicinal == "Yes" & Decriminalized == "Yes", "Medicinal, decriminalized", legality),
+         legality = ifelse(LegalStatus == "Mixed" & Medicinal == "CBD Oil Only" & Decriminalized == "No", "CBD Oil Only, not decriminalized", legality),
+         legality = ifelse(LegalStatus == "Mixed" & Medicinal == "CBD Oil Only" & Decriminalized == "Yes", "CBD Oil Only, decriminalized", legality),
+         legality = ifelse(LegalStatus == "Legalized" & Decriminalized == "Yes", "Legalized, decriminalized", legality),
+         legality = ifelse(LegalStatus == "Legalized" & Decriminalized == "No", "Legalized, not decriminalized", legality),
+         legality = ifelse(LegalStatus == "Fully Illegal" & Decriminalized == "No", "Illegal, not decriminalized", legality),
+         legality = ifelse(LegalStatus == "Fully Illegal" & Decriminalized == "Yes", "Illegal, decriminalized", legality),
+         LegalStatus = ifelse(LegalStatus == "Fully Illegal", "Illegal", LegalStatus),
+         LegalStatus = ifelse(LegalStatus == "Illegal, but decriminalized", "Illegal", LegalStatus)) |>
+  rename(name = state) |>
+  filter(!(name %in% c("Alaska", "Hawaii", "District of Columbia", "Puerto Rico"))) |>
+  left_join(states, join_by(name)) |>
+  st_as_sf()
+```
+
+```{r}
 # Second static plot
   ggplot(marijuana_laws2024_sf) +
   geom_sf(aes(fill = LegalStatus)) +
-  scale_fill_brewer(palette = "Set1") +
+  scale_fill_manual(values = c("#e41a1c", "#4daf4a", "#377eb8")) +
   labs(title = "Legalization of Marijuana in the US 2022",
        fill = "Legaility",
        caption = "Source: https://worldpopulationreview.com/state-rankings/marijuana-laws-by-state") +
@@ -134,12 +139,12 @@ leaflet(census_sf) |>
 ```{r}
 # Second interactive plot
 marijuana_laws2024_sf <- marijuana_laws2024_sf |>
-  mutate(labels = str_c(name, ": ", legality, ""))
+  mutate(labels = str_c(name, ": ", legality))
 
 labels <- lapply(marijuana_laws2024_sf$labels, HTML)
 
 levels(marijuana_laws2024_sf$LegalStatus)
-factpal <- colorFactor(c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3"),
+factpal <- colorFactor(c("#e41a1c", "#4daf4a", "#377eb8"),
                        levels(marijuana_laws2024_sf$LegalStatus))
 
 leaflet(marijuana_laws2024_sf) |>
@@ -164,6 +169,7 @@ leaflet(marijuana_laws2024_sf) |>
       textsize = "15px",
       direction = "auto")) |>
   addLegend(pal = factpal, values = ~marijuana_laws2024_sf$LegalStatus, 
-            opacity = 0.7, title = NULL, position = "bottomright")
+            opacity = 0.7, title = NULL, position = "bottomright") |>
+  addControl("<h4>Legalization of Marijuana in the US 2022</h4>", position = "topright", className = "map-title")
 ```
 

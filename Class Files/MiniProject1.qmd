@@ -18,16 +18,15 @@ library(leaflet)
 library(sf)
 library(htmltools)
 library(glue)
+library(readr)
 ```
 
 ```{r}
 # Load in datasets
-decennial_census10 <- read_csv("Data/DECENNIALCD1162010.P1-Data.csv")
-decennial_census20 <- read_csv("Data/DECENNIALCD1182020.P1-Data.csv")
+decennial_census10 <- read_csv("Class Files/Data/DECENNIALCD1162010.P1-Data.csv")
+decennial_census20 <- read_csv("Class Files/Data/DECENNIALCD1182020.P1-Data.csv")
 
-weed_2022 <- read_csv("Data/regulations.csv")
-
-marijuana_laws2024 <- read_csv("Data/marijuana-laws-by-state-2024.csv")
+marijuana_laws2024 <- read_csv("Class Files/Data/marijuana-laws-by-state-2024.csv")
 ```
 
 ```{r}
@@ -80,8 +79,6 @@ marijuana_laws2024_sf <- marijuana_laws2024 |>
        fill = "% Change",
        caption = " Source: data.census.gov") +
   theme_bw()
-
-# Remember to write alt-text to describe
 ```
 
 This is a map of the United States showing the percent change in population of the United States from 2010 to 2020 by state. On the y-axis is longitude and on the x-axis is latitude. Percent change varies from a decrease of -3% of the population to an increase of 18%, with red representing a decrease in population (a negative percentage) and green representing an increase in population (a positive percentage). We can see from this map that Utah, Idaho, and Texas had the largest percent increase in population. The states in the Midwest, such as Illinois, Iowa, Minnesota, South Dakota, Wisconsin, etc. (the 90W and 45N area), the states also had an increase in population however it is a smaller percentage. West Virginia is the only visible state that is red and this represents a decrease in population by 3.19%. For the population increase in states, this could be caused by people moving states, and more people in the United States overall. 

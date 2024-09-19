@@ -42,11 +42,19 @@ census_sf <- decennial_census10 |>
   rename(name = NAME,
          population20 = P1_001N,
          population10 = P001001) |>
-  select(name, population10, population20) |>
-  filter(!(name %in% c("Alaska", "Hawaii", "District of Columbia", "Puerto Rico", "Label for GEO_ID"))) |>
+  select(name, 
+         population10, 
+         population20) |>
+  filter(!(name %in% c("Alaska", 
+                       "Hawaii", 
+                       "District of Columbia", 
+                       "Puerto Rico", 
+                       "Label for GEO_ID"))
+  ) |>
   mutate(population10 = as.double(population10),
          population20 = as.double(population20),
-         perc_change = (population20 - population10)/abs(population10) * 100) |>
+         perc_change = (population20 - population10)/abs(population10) * 100,
+         perc_change = round(perc_change, 3)) |>
   left_join(states, join_by(name)) |>
   st_as_sf()
 
@@ -76,8 +84,8 @@ my_scale <- colorRamp(c("red", "white", "#2aab32"), interpolate="linear")
 pal <- colorBin(palette = my_scale, domain = census_sf$perc_change, bins = bins)
 
 census_sf <- census_sf |>
- mutate(labels = str_c(name, ": ", perc_change, "% Change in Population"))
-labels <- lapply(census_sf$labels, HTML)
+  mutate(labels = str_c(name, ": ", perc_change, "% Change in Population"))
+  labels <- lapply(census_sf$labels, HTML)
 
 leaflet(census_sf) |>
   setView(-96, 37.8, 4) |>
@@ -100,9 +108,14 @@ leaflet(census_sf) |>
       style = list("font-weight" = "normal", padding = "3px 8px"),
       textsize = "15px",
       direction = "auto")) |>
-  addLegend(pal = pal, values = ~census_sf$perc_change, 
-            opacity = 0.7, title = "% Change", position = "bottomright") |>
-  addControl("<h4>Percentage Change in Population of The US, 2010 to 2020</h4>", position = "topright", className = "map-title")
+  addLegend(pal = pal, 
+            values = ~census_sf$perc_change, 
+            opacity = 0.7, 
+            title = "% Change", 
+            position = "bottomright") |>
+  addControl("<h4>Percentage Change in Population of The US, 2010 to 2020</h4>", 
+             position = "topright", 
+             className = "map-title")
 
 ```
 
@@ -117,8 +130,10 @@ marijuana_laws2024_sf <- marijuana_laws2024 |>
          legality = ifelse(LegalStatus == "Legalized" & Decriminalized == "No", "Legalized, not decriminalized", legality),
          legality = ifelse(LegalStatus == "Fully Illegal" & Decriminalized == "No", "Illegal, not decriminalized", legality),
          legality = ifelse(LegalStatus == "Fully Illegal" & Decriminalized == "Yes", "Illegal, decriminalized", legality),
+         legality = ifelse(LegalStatus == "Illegal, but decriminalized" & Decriminalized == "Yes", "Illegal, decriminalized", legality),
          LegalStatus = ifelse(LegalStatus == "Fully Illegal", "Illegal", LegalStatus),
-         LegalStatus = ifelse(LegalStatus == "Illegal, but decriminalized", "Illegal", LegalStatus)) |>
+         LegalStatus = ifelse(LegalStatus == "Illegal, but decriminalized", "Illegal", LegalStatus)
+         ) |>
   rename(name = state) |>
   filter(!(name %in% c("Alaska", "Hawaii", "District of Columbia", "Puerto Rico"))) |>
   left_join(states, join_by(name)) |>
@@ -127,7 +142,7 @@ marijuana_laws2024_sf <- marijuana_laws2024 |>
 
 ```{r}
 # Second static plot
-  ggplot(marijuana_laws2024_sf) +
+ggplot(marijuana_laws2024_sf) +
   geom_sf(aes(fill = LegalStatus)) +
   scale_fill_manual(values = c("#e41a1c", "#4daf4a", "#377eb8")) +
   labs(title = "Legalization of Marijuana in the US 2022",
@@ -135,6 +150,8 @@ marijuana_laws2024_sf <- marijuana_laws2024 |>
        caption = "Source: https://worldpopulationreview.com/state-rankings/marijuana-laws-by-state") +
   theme_bw()
 ```
+
+This is a map of the United States showing the legalization of marijuana in 2022. On the y-axis is longitude and on the x-axis is latitude. The categories of legality are "Illegal", "Legalized", and "Mixed", with the associated colors on the map being red, green, and blue, respectively. There are 6 states where marijuana is illegal, these states are Idaho, Kansas, Nebraska, North and South Carolina, and Wyoming. On the map, 2 of these states are on the East Coast and the rest are in the middle of the US. For the rest of the US, marijuana is either legalized or has mixed laws. A lot of the states in the west have legalized marijuana, this includes Oregon, Washington, California, along with Nevada and Arizona. There are also some states on the East Coast have also legalized marijuana. Where as states in the south and in the Midwest have mixed laws.
 
 ```{r}
 # Second interactive plot
@@ -144,7 +161,7 @@ marijuana_laws2024_sf <- marijuana_laws2024_sf |>
 labels <- lapply(marijuana_laws2024_sf$labels, HTML)
 
 levels(marijuana_laws2024_sf$LegalStatus)
-factpal <- colorFactor(c("#e41a1c", "#4daf4a", "#377eb8"),
+factpal <- colorFactor(c("#e41a1c", "#4daf4a", "#377eb8"), 
                        levels(marijuana_laws2024_sf$LegalStatus))
 
 leaflet(marijuana_laws2024_sf) |>
@@ -165,11 +182,16 @@ leaflet(marijuana_laws2024_sf) |>
       bringToFront = TRUE),
     label = labels,
     labelOptions = labelOptions(
-      style = list("font-weight" = "normal", padding = "3px 8px"),
+      style = list("font-weight" = "normal", 
+                   padding = "3px 8px"),
       textsize = "15px",
       direction = "auto")) |>
-  addLegend(pal = factpal, values = ~marijuana_laws2024_sf$LegalStatus, 
-            opacity = 0.7, title = NULL, position = "bottomright") |>
-  addControl("<h4>Legalization of Marijuana in the US 2022</h4>", position = "topright", className = "map-title")
+  addLegend(pal = factpal, 
+            values = ~marijuana_laws2024_sf$LegalStatus, 
+            opacity = 0.7, title = NULL, 
+            position = "bottomright") |>
+  addControl("<h4>Legalization of Marijuana in the US 2022</h4>", 
+             position = "topright", 
+             className = "map-title")
 ```
 

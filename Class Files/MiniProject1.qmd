@@ -60,7 +60,7 @@ census_sf <- decennial_census10 |>
 
 ```
 
-```{r}
+```{r, out.width= "100%"}
 # First static plot
   ggplot(census_sf) +
   geom_sf(aes(fill = perc_change)) +
@@ -140,7 +140,7 @@ marijuana_laws2024_sf <- marijuana_laws2024 |>
   st_as_sf()
 ```
 
-```{r}
+```{r, out.width= "100%"}
 # Second static plot
 ggplot(marijuana_laws2024_sf) +
   geom_sf(aes(fill = LegalStatus)) +

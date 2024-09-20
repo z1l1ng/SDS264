@@ -1,0 +1,111 @@
+---
+title: "Ziling Zhen Mini Project #1 Static Plots"
+sidebar: false
+format:
+  pdf: default
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, echo = FALSE, include=FALSE}
+# Load in libraries
+library(tidyverse)
+library(maps)
+library(viridis)
+library(statebins)
+library(leaflet)
+library(sf)
+library(htmltools)
+library(glue)
+library(readr)
+```
+
+```{r, echo=FALSE, include=FALSE}
+# Load in datasets
+decennial_census10 <- read_csv("Data/DECENNIALCD1162010.P1-Data.csv")
+decennial_census20 <- read_csv("Data/DECENNIALCD1182020.P1-Data.csv")
+
+marijuana_laws2024 <- read_csv("Data/marijuana-laws-by-state-2024.csv")
+```
+
+```{r, echo=FALSE, include=FALSE}
+# Load in states sf
+states <- read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson")  #<2>
+states
+```
+
+```{r, echo=FALSE, include=FALSE}
+# Data wrangling
+census_sf <- decennial_census10 |>
+  left_join(decennial_census20, join_by(NAME)) |>
+  rename(name = NAME,
+         population20 = P1_001N,
+         population10 = P001001) |>
+  select(name, 
+         population10, 
+         population20) |>
+  filter(!(name %in% c("Alaska", 
+                       "Hawaii", 
+                       "District of Columbia", 
+                       "Puerto Rico", 
+                       "Label for GEO_ID"))
+  ) |>
+  mutate(population10 = as.double(population10),
+         population20 = as.double(population20),
+         perc_change = (population20 - population10)/abs(population10) * 100,
+         perc_change = round(perc_change, 3)) |>
+  left_join(states, join_by(name)) |>
+  st_as_sf()
+
+```
+
+```{r, out.width= "100%", echo=FALSE}
+# First static plot
+  ggplot(census_sf) +
+  geom_sf(aes(fill = perc_change)) +
+  scale_fill_gradient2(
+    high = "#2aab32", 
+    mid = "white",
+    low = "red",
+    limits = c(-15, 20)) +
+  labs(title = "Percentage Change in Population of the US from 2010 to 2020",
+       fill = "% Change",
+       caption = " Source: data.census.gov") +
+  theme_bw()
+```
+
+This is a map of the United States showing the percent change in population of the United States from 2010 to 2020 by state. On the y-axis is longitude and on the x-axis is latitude. Percent change varies from a decrease of -3% of the population to an increase of 18%, with red representing a decrease in population (a negative percentage) and green representing an increase in population (a positive percentage). We can see from this map that Utah, Idaho, and Texas had the largest percent increase in population. The states in the Midwest, such as Illinois, Iowa, Minnesota, South Dakota, Wisconsin, etc. (the 90W and 45N area), the states also had an increase in population however it is a smaller percentage. West Virginia is the only visible state that is red and this represents a decrease in population by 3.19%. For the population increase in states, this could be caused by people moving states, and more people in the United States overall. 
+
+```{r, echo=FALSE, include=FALSE}
+# Data wrangling pt. 2
+marijuana_laws2024_sf <- marijuana_laws2024 |>
+  mutate(legality = ifelse(LegalStatus == "Mixed" & Medicinal == "Yes" & Decriminalized == "No", "Medicinal, not decriminalized", LegalStatus),
+         legality = ifelse(LegalStatus == "Mixed" & Medicinal == "Yes" & Decriminalized == "Yes", "Medicinal, decriminalized", legality),
+         legality = ifelse(LegalStatus == "Mixed" & Medicinal == "CBD Oil Only" & Decriminalized == "No", "CBD Oil Only, not decriminalized", legality),
+         legality = ifelse(LegalStatus == "Mixed" & Medicinal == "CBD Oil Only" & Decriminalized == "Yes", "CBD Oil Only, decriminalized", legality),
+         legality = ifelse(LegalStatus == "Legalized" & Decriminalized == "Yes", "Legalized, decriminalized", legality),
+         legality = ifelse(LegalStatus == "Legalized" & Decriminalized == "No", "Legalized, not decriminalized", legality),
+         legality = ifelse(LegalStatus == "Fully Illegal" & Decriminalized == "No", "Illegal, not decriminalized", legality),
+         legality = ifelse(LegalStatus == "Fully Illegal" & Decriminalized == "Yes", "Illegal, decriminalized", legality),
+         legality = ifelse(LegalStatus == "Illegal, but decriminalized" & Decriminalized == "Yes", "Illegal, decriminalized", legality),
+         LegalStatus = ifelse(LegalStatus == "Fully Illegal", "Illegal", LegalStatus),
+         LegalStatus = ifelse(LegalStatus == "Illegal, but decriminalized", "Illegal", LegalStatus)
+         ) |>
+  rename(name = state) |>
+  filter(!(name %in% c("Alaska", "Hawaii", "District of Columbia", "Puerto Rico"))) |>
+  left_join(states, join_by(name)) |>
+  st_as_sf()
+```
+
+```{r, out.width= "100%", echo=FALSE}
+# Second static plot
+ggplot(marijuana_laws2024_sf) +
+  geom_sf(aes(fill = LegalStatus)) +
+  scale_fill_manual(values = c("#e41a1c", "#4daf4a", "#377eb8")) +
+  labs(title = "Legalization of Marijuana in the US 2022",
+       fill = "Legaility",
+       caption = "Source: https://worldpopulationreview.com/state-rankings/marijuana-laws-by-state") +
+  theme_bw()
+```
+
+This is a map of the United States showing the legalization of marijuana in 2022. On the y-axis is longitude and on the x-axis is latitude. The categories of legality are "Illegal", "Legalized", and "Mixed", with the associated colors on the map being red, green, and blue, respectively. There are 6 states where marijuana is illegal, these states are Idaho, Kansas, Nebraska, North and South Carolina, and Wyoming. On the map, 2 of these states are on the East Coast and the rest are in the middle of the US. For the rest of the US, marijuana is either legalized or has mixed laws. A lot of the states in the west have legalized marijuana, this includes Oregon, Washington, California, along with Nevada and Arizona. There are also some states on the East Coast have also legalized marijuana. Where as states in the south and in the Midwest have mixed laws. Note that this is data from 2022, and some states with mixed laws, are now fully legalized.

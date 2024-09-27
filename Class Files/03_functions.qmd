@@ -1,5 +1,5 @@
 ---
-title: "Functions and tidy evaluation"
+title: "Ziling Zhen Functions and tidy evaluation"
 format:
   html: default
   pdf: default
@@ -481,7 +481,7 @@ flights |>
 
 **[Pause to Ponder:]** Here's another nice use of `pick()`.  Predict what the function will do, then run the code to see if you are correct.
 
->> It will choose those the rows and colums we want to count, then take the values of column in our pivot wider is a differetn way of organizing counts, we will have manufacturer, model, and then colums with the number of cylinders  
+>> It will choose those the rows and colums we want to count, then take the values of column in our pivot wider is a differetn way of organizing counts, we will have manufacturer, model, and then columns with the number of cylinders  
 
 ```{r}
 #| eval: FALSE
@@ -672,7 +672,7 @@ both_na(test_x, test_y)
 
 7. Run your code from (6) with the following two vectors: `test_x <- c(1, 2, 3, NA, NA, NA)` and `test_y <- c(NA, 1, 2, 3, NA)`. Did you get the output you wanted or expected?  Modify your function using `if`, `else`, and `stop` to print an error if x and y are not the same length.  Then test again with `test_x`, `test_y` and the sets of vectors you used in (6).
 
-```{r}
+```{r, error = TRUE}
 test_x2 <- c(1, 2, 3, NA, NA, NA)
 test_y2 <- c(NA, 1, 2, 3, NA)
 
@@ -751,11 +751,24 @@ foo1 <- function(x) {
 
 ```
 
->> The function takes an input vector x and finds the difference between each element of x except
-for the first and last elements. Then it adds the all of the differences together if the difference
-is less than 0 and outputs a single number
+>> The function takes an input vector x and then slices the first number out so we have the every number after the first number then subtracts it from everything but the last number. For ex. the 2nd number minus the 1st and then the 3rd minus the 2nd and 4th minus the 3rd etc. until there are no more numbers in the list. It will then assign that to diff, if the sum of diff is less than zero then it will print out a 0 and if none of those differences are less than zero it will spit out a zero, if it is less than zero then it will give the number of digits in the vector that are less than zero. 
 
 11. The `foo1()` function doesn't perform well if a vector has missing values.  Amend `foo1()` so that it produces a helpful error message and stops if there are any missing values in the input vector.  Show that it works with appropriately chosen vectors `x`.  Be sure you add `error = TRUE` to your R chunk, or else knitting will fail!
+
+```{r, error = TRUE}
+foo1 <- function(x) {
+  if(any(is.na(x))) {
+stop ("Input Vector Contains NA Values", call. = FALSE)
+}
+diff <- x[-1] - x[1:(length(x) - 1)]
+sum(diff < 0)
+}
+
+temp0
+
+foo1(temp0)
+
+```
 
 
 12. Write a function called `greet` using `if`, `else if`, and `else` to print out "good morning" if it's before 12 PM, "good afternoon" if it's between 12 PM and 5 PM, and "good evening" if it's after 5 PM.  Your function should work if you input a time like: `greet(time = "2018-05-03 17:38:01 CDT")` or if you input the current time with `greet(time = Sys.time())`.  [Hint: check out the `hour` function in the `lubridate` package]
@@ -832,19 +845,31 @@ new_party_id <- summary6(gss_cat, partyid, age)
 
 15. Create a function that has a vector as the input and returns the last value. (Note: Be sure to use a name that does not write over an existing function!)
 
+```{r}
+last_value <- function(x){
+  last_num <- length(x)
+  x[last_num]
+}
+
+temp
+last_value(temp)
+
+temp1
+last_value(temp1)
+```
+
 
 16. Save your final table from (14) and write a function to draw a scatterplot of a measure of center (mean or median - user can choose) vs. a measure of spread (sd or IQR - user can choose), with points sized by sample size, to see if there is constant variance.  Each point should be labeled with partyid, and the plot title should reflect the variables chosen by the user.
 
 ```{r}
 library(ggrepel)
-# TEST
-new_party_id |>
-ggplot(aes(x = mean, y = sd)) +
-  geom_point(aes(size = n)) +
-  geom_smooth(method = lm, se = FALSE) +
-  geom_label_repel(aes(label = partyid)) +
-  labs(title = "title")
-
+# Testing out what I need for my function
+# new_party_id |>
+# ggplot(aes(x = mean, y = sd)) +
+#   geom_point(aes(size = n)) +
+#   geom_smooth(method = lm, se = FALSE) +
+#   geom_label_repel(aes(label = partyid)) +
+#   labs(title = "title")
 ```
 
 ```{r}

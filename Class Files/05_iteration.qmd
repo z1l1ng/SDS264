@@ -122,6 +122,8 @@ Finally, the `while()` loop can be used with unknown sequence length.  This is u
 
 **[Pause to Ponder:]** What does the following code do?
 
+>> For flip function, sample picks "T" or "H". For our while loop it counts the number of coin flips until it gets 3 "H"s in a row. it flip is heads then we add one to nheads and if else it "resets" back to zero, it will output the number of flips it took to get 3 "H"s in a row. 
+
 ```{r}
 flip <- function() sample(c("T", "H"), 1)
 flips <- 0
@@ -361,6 +363,7 @@ long <- df |>
     mean = mean(value)
   )
 long
+
 ```
 
 
@@ -489,6 +492,34 @@ You could then save your result using `write_csv` so you don't have to run the r
 
 1. Compute the mean of every column of the `mtcars` data set using (a) a for loop, (b) a `map` function, (c) the across() function, and (d) pivot_longer().
 
+```{r}
+
+# a) basic for loop to take mean of each column
+output <- vector("double", ncol(mtcars))  # 1. output
+for (i in 1:seq_along(mtcars)) {                      # 2. sequence
+  output[[i]] <- mean(mtcars[[i]])      # 3. body
+}
+output
+
+# b) map function
+map_dbl(mtcars, mean)
+
+# c) across function 
+mtcars |> summarize(
+  n = n(),
+  across(everything(), mean, .names = "mean_{.col}")
+)
+
+# d) pivot longer
+mtcars |>
+  pivot_longer(1:seq_along(mtcars)) |>
+  group_by(name) |>
+  summarize(
+    mean = mean(value)
+  )
+
+```
+
 
 2. Write a function that prints the mean of each *numeric* column in a data frame.  Try it on the `iris` data set. (Hint: `keep(is.numeric)`)
 
@@ -516,18 +547,41 @@ out
 
 4. Compute the number of unique values in each column of the `iris` data set using at least 2 of your favorite iteration methods.  Bonus points if you can use pivot_longer()!
 
+```{r}
+# pivot longer
+iris |>
+  pivot_longer(everything(), values_transform = as.character) |>
+  group_by(name) |>
+  summarize(distinct = n_distinct(value))
+
+# map
+map_dbl(iris, n_distinct)
+
+# for loop
+output <- vector("double", ncol(iris))  # 1. output
+for (i in seq_along(iris)) {                      # 2. sequence
+  output[[i]] <- n_distinct(iris[[i]])      # 3. body
+}
+output
+
+# across
+iris |>
+  summarize(across(everything(), n_distinct, "{.cols}"))
+```
+
 
 5. Carefully explain each step in the pipeline below:
 
 ```{r}
 show_missing <- function(df, group_vars, summary_vars = everything()) {
   df |> 
-    group_by(pick({{ group_vars }})) |> 
+    group_by(pick({{ group_vars }})) |> #this 
     summarize(
       across({{ summary_vars }}, \(x) sum(is.na(x))),
       .groups = "drop"
     ) |>
-    select(where(\(x) any(x > 0)))
+# for column x, only selecting columns where there is at least one NA
+    select(where(\(x) any(x > 0))) 
 }
 nycflights13::flights |> show_missing(c(year, month, day))
 ```

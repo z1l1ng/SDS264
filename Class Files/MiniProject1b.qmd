@@ -22,10 +22,10 @@ library(readr)
 
 ```{r, echo=FALSE, include=FALSE}
 # Load in datasets
-decennial_census10 <- read_csv("Data/DECENNIALCD1162010.P1-Data.csv")
-decennial_census20 <- read_csv("Data/DECENNIALCD1182020.P1-Data.csv")
+decennial_census10 <- read_csv("00_Data/DECENNIALCD1162010.P1-Data.csv")
+decennial_census20 <- read_csv("00_Data/DECENNIALCD1182020.P1-Data.csv")
 
-marijuana_laws2024 <- read_csv("Data/marijuana-laws-by-state-2024.csv")
+marijuana_laws2024 <- read_csv("00_Data/marijuana-laws-by-state-2024.csv")
 ```
 
 ```{r, echo=FALSE, include=FALSE}

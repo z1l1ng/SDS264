@@ -142,9 +142,8 @@ Check your email. Copy and paste your key into a new text file:
 You could then read in the key with code like this:
 
 ```{r}
-myapikey <- readLines("~/264_fall_2024/DS2_preview_work/census_api_key.txt")
+# myapikey <- readLines("00_Folder/CensusAPI.txt")
 ```
-
 
 ### Handling API keys
 
@@ -181,6 +180,10 @@ Another option is to use `Sys.setenv` and `Sys.getenv`:
 #   after uncommenting - should only need to run one time
 # Sys.setenv("CENSUS_KEY" = "my census api key pasted here")
 # my_census_api_key <- Sys.getenv("CENSUS_KEY")
+```
+
+```{r}
+my_census_api_key <- Sys.getenv("VAR1")
 ```
 
 
@@ -222,7 +225,7 @@ We will first use the [`httr2` package](https://httr2.r-lib.org/) to build up a 
 ```{r}
 # Request total number of Hmong residents and margin of error by state
 #   in 2019, as in the User Guide
-CENSUS_API_KEY <- Sys.getenv("CENSUS_API_KEY")
+CENSUS_API_KEY <- Sys.getenv("VAR1")
 req <- request("https://api.census.gov") |> 
     req_url_path_append("data") |> 
     req_url_path_append("2019") |> 
@@ -365,8 +368,36 @@ hennepin_httr <- tibble(
 
 2. Write a function to give choices about year, county, and variables
 
+```{r}
+acs_function <- function(year, county, vars) {
+tidycensus::get_acs(
+    Sys.sleep(0.5),
+    year = year,
+    state = "MN",
+    geography = "tract",
+    variables = vars,
+    output = "wide",
+    geometry = TRUE,
+    county = county,   # specify county in call
+    show_call = TRUE       # see resulting query
+)  |>
+    mutate(year = year)
+  }
+
+acs_function(2021, "Hennepin", c("B01003_001", "B19013_001"))
+```
+
 
 3. Use your function from (2) along with `map` and `list_rbind` to build a data set for Rice county for the years 2019-2021
+
+```{r}
+years <- c(2019, 2020, 2021)
+
+ricedata <- map(years, ~ acs_function(.x, "Rice", c("B01003_001", "B19013_001"))) |>
+  bind_rows()
+
+ricedata
+```
 
 
 ### One more example using an API key

@@ -1,0 +1,292 @@
+---
+title: "library(wordcloud)"
+author: "Ziling Zhen"
+format: revealjs
+incremental: true   
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| echo: false
+library(tidyverse) # duhhh
+library(wordcloud) # for the wordclouds
+library(wordcloud2)
+library(RColorBrewer) # cool colors
+library(tm) # for words
+library(tidytext) # ^
+```
+
+## Libraries 
+- wordcloud (for our wordcloud!)
+- RColorBrewer (for cool colors)
+
+```{r}
+#| echo: false
+potter_untidy <- read_csv("00_Data/potter_untidy.csv")
+potter_tidy <- potter_untidy |>
+  unnest_tokens(output = word, input = text)
+
+potter_spells <- read_csv("00_Data/potter_spells.csv")
+potter_spells <- potter_spells |>
+  filter(spell_name != "Point Me")
+
+potternames <- read_csv("00_Data/potternames.csv") |>
+  mutate(firstname = str_to_lower(firstname),
+         lastname = str_to_lower(lastname))
+```
+
+```{r}
+#| echo: false
+words <- potter_tidy |>
+  anti_join(stop_words) |>
+  anti_join(potternames, join_by(word == firstname)) |>
+  anti_join(potternames, join_by(word == lastname)) |>
+  count(word) |>
+  arrange(desc(n))
+```
+
+## wordcloud() pt.1
+- words: the words
+
+- freq: their frequencies
+
+- scale: A vector of length 2 indicating the range of the size of the words
+
+- min.freq: words with frequency below min.freq will not be plotted
+
+- max.words: Maximum number of words to be plotted. least frequent terms dropped
+
+## wordcloud() pt.2
+- random.order: plot words in random order. If false, they will be plotted in decreasing frequency
+
+- random.color: choose colors randomly from the colors. If false, the color is chosen based on the frequency
+
+- rot.per: proportion words with 90 degree rotation
+
+- colors: color words from least to most frequent
+
+
+## Word Cloud
+```{r}
+set.seed(1234)
+wordcloud(words = words$word, 
+          freq = words$n, 
+          max.words = 100, 
+          random.order = FALSE, 
+          rot.per = 0,            
+          colors = brewer.pal(6, "Dark2"))
+```
+
+## Code
+```{.r code-line-numbers="|1|2|3|4|5|6|7"}
+set.seed(1234)
+wordcloud(words = words$word, 
+          freq = words$n, 
+          max.words = 100, 
+          random.order = FALSE, 
+          rot.per = 0,            
+          colors = brewer.pal(6, "Dark2"))
+```
+```{r}
+set.seed(1234)
+wordcloud(words = words$word, 
+          freq = words$n, 
+          max.words = 100, 
+          random.order = FALSE, 
+          rot.per = 0,            
+          colors = brewer.pal(6, "Dark2"))
+```
+
+## Data
+```{r}
+#| echo: true
+words
+```
+
+## Another Word Cloud
+```{r}
+set.seed(1234)
+wordcloud(words = words$word, 
+          freq = words$n, 
+          max.words = 100, 
+          random.order = TRUE, 
+          rot.per = .25,            
+          colors = brewer.pal(4, "Dark2"))
+```
+
+## Code
+```{.r code-line-numbers="|5|6|7"}
+set.seed(1234)
+wordcloud(words = words$word, 
+          freq = words$n, 
+          max.words = 100, 
+          random.order = TRUE, 
+          rot.per = .25,            
+          colors = brewer.pal(4, "Dark2"))
+```
+```{r}
+set.seed(1234)
+wordcloud(words = words$word, 
+          freq = words$n, 
+          max.words = 100, 
+          random.order = TRUE, 
+          rot.per = .25,            
+          colors = brewer.pal(4, "Dark2"))
+```
+
+## Another Word Cloud
+```{r}
+set.seed(1234)
+wordcloud(words = words$word, 
+          freq = words$n, 
+          scale = c(1,.5),
+          max.words = 500, 
+          random.order = TRUE, 
+          rot.per = .50,            
+          colors = brewer.pal(5, "Set1"))
+```
+
+## Code
+```{.r code-line-numbers="|4|5|6|7|8"}
+set.seed(1234)
+wordcloud(words = words$word, 
+          freq = words$n, 
+          scale = c(1,.5),
+          max.words = 500, 
+          random.order = TRUE, 
+          rot.per = .50,            
+          colors = brewer.pal(5, "Set1"))
+```
+```{r}
+set.seed(1234)
+wordcloud(words = words$word, 
+          freq = words$n, 
+          scale = c(1,.5),
+          max.words = 500, 
+          random.order = TRUE, 
+          rot.per = .50,            
+          colors = brewer.pal(5, "Set1"))
+```
+
+## Last Word Cloud
+```{r}
+set.seed(1234)
+wordcloud(words = words$word, 
+          freq = words$n, 
+          scale = c(2,.5),
+          max.words = 150, 
+          random.color = TRUE,
+          rot.per = .75,            
+          colors = brewer.pal(3, "Set2"))
+```
+
+## Code
+```{.r code-line-numbers="|4|5|6|7|8"}
+set.seed(1234)
+wordcloud(words = words$word, 
+          freq = words$n, 
+          scale = c(2,.5),
+          max.words = 150, 
+          random.color = TRUE,
+          rot.per = .75,            
+          colors = brewer.pal(3, "Set2"))
+```
+```{r}
+set.seed(1234)
+wordcloud(words = words$word, 
+          freq = words$n, 
+          scale = c(2,.5),
+          max.words = 150, 
+          random.color = TRUE,
+          rot.per = .75,            
+          colors = brewer.pal(3, "Set2"))
+```
+
+## Take it a step further: worldcloud2()
+```{r}
+words_df <- words |>
+  slice_head(n = 80) |>
+  data.frame()
+```
+```{r}
+set.seed(1234)
+wordcloud2(words_df, size = .35, shape = 'star')
+```
+
+
+## What to use for data with text? 
+- library(tidytext) (as seen in DS1 )
+- library(tm)
+
+## Using tidytext Example: 
+```{r}
+potter_untidy
+```
+
+## Using tidytext Example:
+```{.r code-line-numbers="|1|2"}
+potter_tidy <- potter_untidy |>
+  unnest_tokens(output = word, input = text)
+```
+```{r}
+potter_tidy
+```
+
+## Using tidytext Example:
+```{.r code-line-numbers="|1|2|3|4"}
+potter_tidy |>
+  anti_join(stop_words) |>
+  count(word) |>
+  arrange(desc(n))
+```
+```{r}
+potter_tidy |>
+  anti_join(stop_words) |>
+  count(word) |>
+  arrange(desc(n))
+```
+
+## Using tm Example:
+```{.r code-line-numbers="|1|2|3|4|5|6|7|8|9"}
+text <- potter_untidy$tex
+docs <- Corpus(VectorSource(text))
+
+docs <- docs %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(stripWhitespace)
+docs <- tm_map(docs, content_transformer(tolower))
+docs <- tm_map(docs, removeWords, stopwords("english"))
+```
+```{r}
+text <- potter_untidy$text
+docs <- Corpus(VectorSource(text))
+
+docs <- docs %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(stripWhitespace)
+docs <- tm_map(docs, content_transformer(tolower))
+docs <- tm_map(docs, removeWords, stopwords("english"))
+```
+
+## Using tm Example:
+```{.r code-line-numbers="|1|2|3|4"}
+dtm <- TermDocumentMatrix(docs) 
+matrix <- as.matrix(dtm) 
+words <- sort(rowSums(matrix), decreasing = TRUE) 
+df <- data.frame(word = names(words), freq = words)
+
+df |> slice_head(n = 25)
+```
+```{r}
+dtm <- TermDocumentMatrix(docs) 
+matrix <- as.matrix(dtm) 
+words <- sort(rowSums(matrix), decreasing = TRUE) 
+df <- data.frame(word = names(words), freq = words)
+
+df |> slice_head(n = 25)
+```
+
+## Last Word Cloud of the Day

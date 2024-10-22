@@ -249,7 +249,7 @@ potter_tidy |>
 
 ## Using tm Example:
 ```{.r code-line-numbers="|1|2|3|4|5|6|7|8|9"}
-text <- potter_untidy$tex
+text <- potter_untidy$text
 docs <- Corpus(VectorSource(text))
 
 docs <- docs %>%
@@ -272,7 +272,7 @@ docs <- tm_map(docs, removeWords, stopwords("english"))
 ```
 
 ## Using tm Example:
-```{.r code-line-numbers="|1|2|3|4"}
+```{.r code-line-numbers="|1|2|3|4|5|6"}
 dtm <- TermDocumentMatrix(docs) 
 matrix <- as.matrix(dtm) 
 words <- sort(rowSums(matrix), decreasing = TRUE) 
@@ -289,4 +289,4 @@ df <- data.frame(word = names(words), freq = words)
 df |> slice_head(n = 25)
 ```
 
-## Last Word Cloud of the Day
+## Questions?

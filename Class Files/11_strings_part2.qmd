@@ -63,8 +63,16 @@ spot_new
 max_length <- max(spot_new$title_length)
 
 str_c("The longest title is", max_length, "characters long.", sep = " ")
+
+spot_new |>
+  mutate(month = str_sub(album_release_date,6, 7))
 ```
 
+>> select 2 columns of album release data and title, then 
+title length is how long the the album title is
+year is the the year that it was released
+title lower is title but lowercase
+and album release date 2 replaces - with /, so we will have 
 
 ## Important functions for identifying strings which match
 
@@ -91,8 +99,30 @@ str_detect(spot_smaller$subgenre, "pop")
 
 2. Use str_detect to print the rows of the spot_smaller tibble containing songs that have "pop" in the subgenre. (i.e. make a new tibble with fewer rows)
 
+```{r}
+spot_even_smaller <- spot_smaller |>
+  mutate(sub_pop = str_detect(subgenre, "pop"))
+
+spot_even_smaller |>
+  filter(sub_pop)
+```
+
 
 3. Find the mean song title length for songs with "pop" in the subgenre and songs without "pop" in the subgenre.  
+
+```{r}
+spot_even_smaller |>
+  mutate(title_length = str_length(title)) |>
+  group_by(sub_pop) |>
+  summarize(mean_title_length = mean(title_length))
+
+spot_even_smaller |>
+  mutate(title_length = str_length(title)) |>
+  group_by(sub_pop) |>
+  summarize(mean_title_length = mean(title_length)) |>
+  mutate(sub_pop = ifelse(sub_pop,"Genre with pop", "Genre without pop"))
+```
+
 
 Producing a table like this would be great:
 
@@ -117,6 +147,13 @@ Producing a table like this would be SUPER great (hint: ifelse()):
 bigspotify <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv')
 
 bigspotify
+```
+
+```{r}
+bigspotify |>
+  mutate(haslove = str_detect(track_name, "love")) |>
+  group_by(playlist_genre) |>
+  summarise(prop_love = mean(haslove, na.rm = TRUE))
 ```
 
 
@@ -157,6 +194,28 @@ str_view(spot_smaller$artist, "[^A-Za-z ]")
 # For example, to find words with "tion" at any point, I could use:
 str_view(words, "tion")
 str_subset(words, "tion")
+
+#Start with “y”
+str_view(words, "^y")
+
+#End with “x”
+str_view(words, "x$")
+
+#Are exactly three letters long
+str_view(words, "^[A-Za-z]{3}$") #OR
+str_view(words, "^...$")
+
+# Have seven letters or more.
+str_view(words, "^.......")
+
+#Start with a vowel.
+str_view(words, "^[aeiou]")
+
+#End with ed, but not with eed
+str_view(words, "[^e]ed$")
+
+#Words where q is not followed by u
+str_view(words, "q[^u]")
 ```
 
 

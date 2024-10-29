@@ -167,7 +167,7 @@ And you can access the values in R using `Sys.getenv()`:
 ```{r}
 #| eval: FALSE
 
-Sys.getenv("VAR1")
+Sys.getenv("censusapi")
 #> [1] "value1"
 ```
 
@@ -183,7 +183,7 @@ Another option is to use `Sys.setenv` and `Sys.getenv`:
 ```
 
 ```{r}
-my_census_api_key <- Sys.getenv("VAR1")
+my_census_api_key <- Sys.getenv("censusapi")
 ```
 
 
@@ -225,7 +225,7 @@ We will first use the [`httr2` package](https://httr2.r-lib.org/) to build up a 
 ```{r}
 # Request total number of Hmong residents and margin of error by state
 #   in 2019, as in the User Guide
-CENSUS_API_KEY <- Sys.getenv("VAR1")
+CENSUS_API_KEY <- Sys.getenv("censusapi")
 req <- request("https://api.census.gov") |> 
     req_url_path_append("data") |> 
     req_url_path_append("2019") |> 
@@ -370,8 +370,8 @@ hennepin_httr <- tibble(
 
 ```{r}
 acs_function <- function(year, county, vars) {
+    Sys.sleep(0.5)
 tidycensus::get_acs(
-    Sys.sleep(0.5),
     year = year,
     state = "MN",
     geography = "tract",
@@ -391,10 +391,9 @@ acs_function(2021, "Hennepin", c("B01003_001", "B19013_001"))
 3. Use your function from (2) along with `map` and `list_rbind` to build a data set for Rice county for the years 2019-2021
 
 ```{r}
-years <- c(2019, 2020, 2021)
+years <- c(2019:2021)
 
-ricedata <- map(years, ~ acs_function(.x, "Rice", c("B01003_001", "B19013_001"))) |>
-  bind_rows()
+ricedata <- years |> purrr::map(acs_function, county = "Rice", vars = c("B01003_001", "B19013_001")) |> list_rbind()
 
 ricedata
 ```
@@ -415,7 +414,7 @@ We will first obtain data about the movie Coco from 2017.
 ```{r}
 #| eval: FALSE
 
-myapikey <- Sys.getenv("OMDB_KEY")
+myapikey <- Sys.getenv("omdbapi")
 
 # Find url exploring examples at omdbapi.com
 url <- str_c("http://www.omdbapi.com/?t=Coco&y=2017&apikey=", myapikey)

@@ -1,0 +1,272 @@
+---
+title: "SDS 264 HW3"
+format:
+  html: default
+  pdf: default
+editor_options: 
+  chunk_output_type: console
+---
+```{r}
+# Libraries
+library(tidyverse)
+library(stringr)
+library(rvest)
+library(polite)
+library(sf)
+library(maps)
+library(viridis)
+library(leaflet)
+library(htmltools)
+library(janitor)
+library(httr2)
+library(httr)
+library(lubridate)
+library(tidycensus)
+library(purrr)
+```
+
+**07 - On Your Own #2-3**
+2. Write a function to give choices about year, county, and variables
+
+```{r}
+acs_function <- function(year, county, vars) {
+    Sys.sleep(0.5)
+tidycensus::get_acs(
+    year = year,
+    state = "MN",
+    geography = "tract",
+    variables = vars,
+    output = "wide",
+    geometry = TRUE,
+    county = county,   # specify county in call
+    show_call = TRUE       # see resulting query
+)  |>
+    mutate(year = year)
+  }
+
+acs_function(2021, "Hennepin", c("B01003_001", "B19013_001"))
+```
+
+
+3. Use your function from (2) along with `map` and `list_rbind` to build a data set for Rice county for the years 2019-2021
+
+```{r}
+years <- c(2019:2021)
+
+ricedata <- years |> 
+  purrr::map(acs_function, 
+             county = "Rice", 
+             vars = c("B01003_001", "B19013_001")) |> 
+  list_rbind()
+
+ricedata
+```
+
+**07 - OMDB example - obtain a key and assemble your own well-formatted 5x5 tibble with 5 movies of your choosing and 5 variables of your choosing (see what else is available)**
+
+Here's an example of getting data from a website that attempts to make imdb movie data available as an API.
+
+Initial instructions:
+
+- go to omdbapi.com under the API Key tab and request a free API key
+- store your key as discussed earlier
+- explore the examples at omdbapi.com
+
+```{r}
+myapikey <- Sys.getenv("omdbapi")
+```
+
+```{r}
+# Must figure out pattern in URL for obtaining different movies
+#  - try searching for others
+movies <- c("Despicable+Me", "The+Wild+Robot", "Anyone+But+You", 
+            "Barbie", "Top+Gun:+Maverick")
+
+# Set up empty tibble
+omdb <- tibble(title = character(), 
+               released = character(),
+               runtime_min = double(),
+               imdbrating = character(),
+               rottentomatorating = double())
+
+# Use for loop to run through API request process 5 times,
+#   each time filling the next row in the tibble
+for(i in 1:5) {
+  url <- str_c("http://www.omdbapi.com/?t=",movies[i],
+               "&apikey=", myapikey)
+  Sys.sleep(0.5)
+  onemovie <- GET(url)
+  details <- content(onemovie, "parse")
+  omdb[i,1] <- details$Title
+  omdb[i,2] <- details$Released
+  omdb[i,3] <- parse_number(details$Runtime)
+  omdb[i,4] <- details$Ratings[[1]]$Value
+  omdb[i,5] <- parse_number(details$Ratings[[2]]$Value)
+}
+
+omdb |>
+  mutate(released = dmy(released),
+         imdbrating = as.numeric(str_remove(imdbrating, "/10")))
+```
+
+**08 - On Your Own #2.2-2.4**
+
+2. We would like to create a tibble with 4 years of data (2001-2004) from the Minnesota Wild hockey team.  Specifically, we are interested in the "Scoring Regular Season" table from [this webpage](https://www.hockey-reference.com/teams/MIN/2001.html) and the similar webpages from 2002, 2003, and 2004.  Your final tibble should have 6 columns:  player, year, age, pos (position), gp (games played), and pts (points).
+
+You should (a) write a function called `hockey_stats` with inputs for team and year to scrape data from the "scoring Regular Season" table, and (b) use iteration techniques to scrape and combine 4 years worth of data.  Here are some functions you might consider:
+
+- `row_to_names(row_number = 1)` from the `janitor` package
+- `clean_names()` also from the `janitor` package
+- `bow()` and `scrape()` from the `polite` package
+- `str_c()` from the `stringr` package (for creating urls with user inputs)
+- `map2()` and `list_rbind()` for iterating and combining years
+
+Try following these steps:
+
+1) Be sure you can find and clean the correct table from the 2021 season.
+
+2) Organize your `rvest` code from (1) into functions from the `polite` package.
+
+3) Place the code from (2) into a function where the user can input a team and year.  You would then adjust the url accordingly and produce a clean table for the user.
+
+4) Use `map2` and `list_rbind` to build one data set containing Minnesota Wild data from 2001-2004.
+
+```{r}
+# To check if web scraping is allowed
+robotstxt::paths_allowed("https://www.hockey-reference.com/teams/MIN/2001.html")
+
+# Step 1: read_html()
+url <- str_c("https://www.hockey-reference.com/teams/MIN/2001.html")
+player_url <- read_html(url)
+
+# 2: html_nodes()
+playerstat <- html_nodes(player_url, css = "table") 
+playerstat  # have to guesstimate which table contains our desired info
+
+# 3: html_table()
+html_table(playerstat, header = TRUE, fill = TRUE)    # find the right table
+player_table <- html_table(playerstat, header = TRUE, fill = TRUE)[[4]]  
+player_table |>
+  row_to_names(row_number = 1)
+
+player_tibble <- html_table(playerstat, header = TRUE, fill = TRUE)[[4]] |>
+  row_to_names(row_number = 1) |>
+  clean_names()
+player_tibble
+```
+
+```{r}
+#Perform Steps 0-3 using the polite package
+session <- bow("https://www.hockey-reference.com/teams/MIN/2001.html", force = TRUE)
+
+result <- scrape(session) |>
+  html_nodes(css = "table") |>
+  html_table(header = TRUE, fill = TRUE)
+player_table <- result[[4]] |>
+  row_to_names(row_number = 1) |>
+  clean_names()
+player_table
+```
+
+```{r}
+input_team_year <- function(team, year){
+
+url <- str_c("https://www.hockey-reference.com/teams/", team, "/", year, ".html")
+session <- bow(url, force = TRUE)
+
+result <- scrape(session) |>
+  html_nodes(css = "table") |>
+  html_table(header = TRUE, fill = TRUE)
+
+html_table <- result[[4]] 
+
+player_stats <- html_table |>
+  row_to_names(row_number = 1) |>
+  clean_names() |>
+  mutate(year = year) |>
+  select(player, year, age, pos, gp, pts)
+player_stats
+}
+
+input_team_year("DAL", "2001")
+```
+
+```{r}
+teams <- rep("MIN", 4)
+years <- 2001:2004
+
+temp <- map2(teams, years, input_team_year)
+hockey_data4yrs <- list_rbind(temp)
+hockey_data4yrs |>
+  filter(player != "Team Totals")
+```
+
+**09 - Pause to Ponder - 3 items on NIH News Releases right before the On Your Own section**
+
+**[Pause to Ponder:]** Create a function to scrape a single NIH press release page by filling missing pieces labeled `???`:
+
+```{r}
+# Helper function to reduce html_nodes() |> html_text() code duplication
+get_text_from_page <- function(page, css_selector) {
+  page |>
+  html_nodes(css_selector) |>
+  html_text()
+}
+
+# Main function to scrape and tidy desired attributes
+scrape_page <- function(url) {
+    Sys.sleep(2)
+    page <- read_html(url)
+    article_titles <- get_text_from_page(page, ".teaser-title")
+    article_dates <- get_text_from_page(page, ".date-display-single")
+    article_dates <- mdy(article_dates)
+    article_description <- get_text_from_page(page, ".teaser-description")
+    article_description <- str_trim(str_replace(article_description, 
+                                                ".*\\n", 
+                                                "")
+                                    )
+    
+    tibble(
+      title = article_titles,
+      pub_dates = article_dates, 
+      description = article_description
+    )
+}
+
+scrape_page("https://www.nih.gov/news-events/news-releases")
+```
+
+
+**[Pause to Ponder:]** Use a for loop over the first 5 pages:
+
+```{r}
+pages <- vector("list", length = 5)
+
+for (i in 1:5) {
+    Sys.sleep(2)
+    base_url <- "https://www.nih.gov/news-events/news-releases"
+    if (i==1) {
+        url <- base_url
+    } else {
+        url <- str_c(base_url, "?page=", i-1)
+    }
+    pages[[i]] <- scrape_page(url)
+}
+
+df_articles <- bind_rows(pages)
+df_articles
+```
+
+
+**[Pause to Ponder:]** Use map functions in the purrr package:
+
+```{r}
+
+# Create a character vector of URLs for the first 5 pages
+base_url <- "https://www.nih.gov/news-events/news-releases"
+urls_all_pages <- c(base_url, str_c(base_url, "?page=", seq(1:4)))
+
+pages2 <- purrr::map(urls_all_pages, scrape_page)
+df_articles2 <- bind_rows(pages2)
+df_articles2
+```

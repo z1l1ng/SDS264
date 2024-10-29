@@ -221,19 +221,19 @@ NOW - continue this process to build a tibble with the most recent 50 NIH news r
 
 # Helper function to reduce html_nodes() |> html_text() code duplication
 get_text_from_page <- function(page, css_selector) {
-nih_description <- scrape(page) |>
+  page |>
   html_nodes(css_selector) |>
   html_text()
 }
 
 # Main function to scrape and tidy desired attributes
 scrape_page <- function(url) {
-    Sys.sleep(3)
+    Sys.sleep(2)
     page <- read_html(url)
     article_titles <- get_text_from_page(page, ".teaser-title")
     article_dates <- get_text_from_page(page, ".date-display-single")
     article_dates <- mdy(article_dates)
-    article_description <- get_text_from_page(".teaser-description")
+    article_description <- get_text_from_page(page, ".teaser-description")
     article_description <- str_trim(str_replace(article_description, 
                                                 ".*\\n", 
                                                 "")
@@ -245,6 +245,8 @@ scrape_page <- function(url) {
       description = article_description
     )
 }
+
+scrape_page("https://www.nih.gov/news-events/news-releases")
 ```
 
 
@@ -270,20 +272,6 @@ df_articles <- bind_rows(pages)
 head(df_articles)
 ```
 
-```{r}
-for (i in 0:5) {
-    Sys.sleep(2)
-    base_url <- "https://www.nih.gov/news-events/news-releases"
-    if (i==0) {
-        url <- base_url
-    } else {
-        url <- str_c(base_url, "?page=", i)
-    }
-    pages[[i]] <- scrape_page(url)
-}
-```
-
-
 **[Pause to Ponder:]** Use map functions in the purrr package:
 
 ```{r}
@@ -304,10 +292,125 @@ head(df_articles2)
 1. Go to https://www.bestplaces.net and search for Minneapolis, Minnesota.  This is a site some people use when comparing cities they might consider working in and/or moving to.  Using SelectorGadget, extract the following pieces of information from the Minneapolis page:
 
 - property crime (on a scale from 0 to 100)
+>> .col-4 > div:nth-child(1)
+
 - minimum income required for a single person to live comfortably
+>> .text-center+ .text-center div:nth-child(1)
+
 - average monthly rent for a 2-bedroom apartment
+>> .col-3~ .col-3+ .col-3 .mb-2
+
 - the "about" paragraph (the very first paragraph above "Location Details")
+>> .ms-3:nth-child(3)
+
+```{r}
+scrape_page <- function(url) {
+    Sys.sleep(2)
+    page <- read_html(url)
+    article_titles <- get_text_from_page(page, ".teaser-title")
+    article_dates <- get_text_from_page(page, ".date-display-single")
+    article_dates <- mdy(article_dates)
+    article_description <- get_text_from_page(page, ".teaser-description")
+    article_description <- str_trim(str_replace(article_description, 
+                                                ".*\\n", 
+                                                "")
+                                    )
+    
+    tibble(
+      title = article_titles,
+      pub_dates = article_dates, 
+      description = article_description
+    )
+}
+```
+
+
+```{r}
+get_text_from_page <- function(page, css_selector) {
+  page |>
+  html_nodes(css_selector) |>
+  html_text()
+}
+
+page <- read_html("https://www.bestplaces.net/city/minnesota/minneapolis")
+
+prop_crime <- get_text_from_page(page, ".col-4 > div:nth-child(1)")
+medium_single_income <- get_text_from_page(page, ".text-center+ .text-center div:nth-child(1)")
+avg_month_rent <- get_text_from_page(page, ".col-3~ .col-3+ .col-3 .mb-2")
+about <- get_text_from_page(page, ".ms-3:nth-child(3)")
+```
+
+```{r}
+minneapolis <- tibble(
+      crime = prop_crime,
+      min_income_single = medium_single_income, 
+      rent_2br = avg_month_rent,
+      about = about 
+    )
+```
+
+```{r}
+minneapolis |>
+  mutate(crime = str_remove(crime, " / 100"),
+         crime = as.integer(crime),
+         min_income_single = parse_number(min_income_single),
+         rent_2br = parse_number(rent_2br))
+```
+
 
 2. Write a function called `scrape_bestplaces()` with arguments for `state` and `city`.  When you run, for example, `scrape_bestplaces("minnesota", "minneapolis")`, the output should be a 1 x 6 tibble with columns for `state`, `city`, `crime`, `min_income_single`, `rent_2br`, and `about`.
 
+```{r}
+scrape_bestplaces <- function(state, city){
+url <- str_c("https://www.bestplaces.net/city/", state, "/", city)
+page <- read_html(url)
+
+prop_crime <- get_text_from_page(page, ".col-4 > div:nth-child(1)")
+medium_single_income <- get_text_from_page(page, ".text-center+ .text-center div:nth-child(1)")
+avg_month_rent <- get_text_from_page(page, ".col-3~ .col-3+ .col-3 .mb-2")
+about <- get_text_from_page(page, ".ms-3:nth-child(3)")
+
+tibble <- tibble(
+      state = state,
+      city = city,
+      crime = prop_crime,
+      min_income_single = medium_single_income, 
+      rent_2br = avg_month_rent,
+      about = about
+    )
+
+tibble |>
+  mutate(crime = str_remove(crime, " / 100"),
+         crime = as.integer(crime),
+         min_income_single = parse_number(min_income_single),
+         rent_2br = parse_number(rent_2br))
+}
+```
+
+```{r}
+scrape_bestplaces("minnesota", "minneapolis")
+scrape_bestplaces("oregon", "portland")
+```
+
+
 3. Create a 5 x 6 tibble by running `scrape_bestplaces()` 5 times with 5 cities you are interested in.  You might have to combine tibbles using `bind_rows()`.  Be sure you look at the URL at bestplaces.net for the various cities to make sure it works as you expect.  For bonus points, create the same 5 x 6 tibble for the same 5 cities using `purrr:map2`!
+
+
+```{r}
+cities <- c("portland", "vancouver", "corvallis", "beaverton", "chicago")
+state <- c("oregon", "washington", "oregon", "oregon", "illinois")
+
+big <- map2(state, cities, scrape_bestplaces)
+lotsofdata <- list_rbind(big)
+lotsofdata
+```
+
+```{r}
+lotsofdata2 <- bind_rows(scrape_bestplaces("oregon", "portland"), 
+                         scrape_bestplaces("washington", "vancouver"), 
+                         scrape_bestplaces("oregon", "corvallis"), 
+                         scrape_bestplaces("oregon", "beaverton"), 
+                         scrape_bestplaces("illinois", "chicago"))
+lotsofdata2
+```
+

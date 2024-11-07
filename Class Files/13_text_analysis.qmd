@@ -48,9 +48,10 @@ We will use the `gutenbergr` package to obtain several works from [Project Guten
 # three_works2 <- read_csv("Data/three_works.csv") 
 
 library(RCurl)
-three_works <- read_csv(
-  file = getURL("https://raw.githubusercontent.com/proback/264_fall_2024/refs/heads/main/Data/three_works.csv"))
+#three_works <- read_csv(
+  #file = getURL("https://raw.githubusercontent.com/proback/264_fall_2024/refs/heads/main/Data/three_works.csv"))
 
+three_works <- read_csv("Class Files/00_Data/three_works.csv")
 three_works |> count(title)
 three_works
 

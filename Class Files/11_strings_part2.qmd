@@ -84,18 +84,26 @@ str_detect() : useful when working within a tibble
 1. Identify the input type and output type for each of these examples:
 
 ```{r}
+#1
 str_view(spot_smaller$subgenre, "pop")
 typeof(str_view(spot_smaller$subgenre, "pop"))
 class(str_view(spot_smaller$subgenre, "pop"))
 
+#2
 str_view(spot_smaller$subgenre, "pop", match = NA)
 str_view(spot_smaller$subgenre, "pop", html = TRUE)
 
+#3
 str_subset(spot_smaller$subgenre, "pop")
 
+#4
 str_detect(spot_smaller$subgenre, "pop")
 ```
 
+>> 1) input: a vector of 10 strings, output: view of the strings with "pop"
+2) input: a vector of 10 strings, output: view of the strings with "pop" and the ones without
+3) input: a vector of 10 strings, output: 5 vectors with "pop"
+4) input: a vector of 10 strings, output: trues or falses for if our string contains "pop"
 
 2. Use str_detect to print the rows of the spot_smaller tibble containing songs that have "pop" in the subgenre. (i.e. make a new tibble with fewer rows)
 
@@ -206,7 +214,8 @@ str_view(words, "^[A-Za-z]{3}$") #OR
 str_view(words, "^...$")
 
 # Have seven letters or more.
-str_view(words, "^.......")
+str_view(words, "^.......") #OR
+str_view(words, "^.{7}") 
 
 #Start with a vowel.
 str_view(words, "^[aeiou]")
@@ -244,8 +253,33 @@ str_view(spot_smaller$title, "\\$")
 
 6. In bigspotify, how many track_names include a $?  Be sure you print the track_names you find and make sure the dollar sign is not just in a featured artist!
 
+```{r}
+bigspotify |>
+  filter(str_detect(track_name, "\\$")) |>
+  #filter(!str_detect(track_name,"\\(.*\\$.*\\)")) |>
+  filter(!str_detect(track_name, "(feat|with).*\\$")) |>
+  select(track_name, track_artist) |>
+  print(n = Inf)
+```
+
 
 7. In bigspotify, how many track_names include a dollar amount (a $ followed by a number).
+
+```{r}
+bigspotify |>
+  filter(str_detect(track_name, "\\$\\d")) |>
+  filter(!str_detect(track_name, "(feat|with).*\\$")) |>
+  select(track_name, track_artist) |>
+  print(n = Inf)
+```
+
+OR
+
+```{r}
+bigspotify |>
+    filter(str_detect(track_name, "\\$\\d")) |>
+    select(track_name, track_artist)
+```
 
 
 ## Repetition
@@ -257,6 +291,7 @@ str_view(spot_smaller$title, "\\$")
 {n,} n or more times
 {,m} at most m times
 {n,m} between n and m times
+? or 
 
 ```{r}
 str_view(spot_smaller$album_name, "[A-Z]{2,}")
@@ -269,11 +304,33 @@ str_view(spot_smaller$album_release_date, "\\d{4}-\\d{2}")
 
 8. Modify the first regular expression above to also pick up "m.A.A.d" (in addition to "BEYONC" and "II").  That is, pick up strings where there might be a period between capital letters.
 
+```{r}
+str_view(spot_smaller$album_name, "[A-Z?.A-Z]{2,}")
+
+str_view(spot_smaller$album_name, "[A-Z?.]{2,}")
+```
 
 9. Create some strings that satisfy these regular expressions and explain.
 
-- "^.*$"
+- "^.*$" 
+this can be any expression
+
 - "\\{.+\\}"
+this contains curly brackets with 1 or more things in it
+
+```{r}
+str_detect("", "^.*$")
+str_detect("m,y", "^.*$")
+str_detect("97^7hf", "^.*$")
+str_detect(")9nfud%{}", "^.*$")
+str_detect("n 09", "^.*$")
+
+str_detect("{tfvb0987}", "\\{.+\\}")
+str_detect("{ziling zhen}", "\\{.+\\}")
+str_detect("{Z}", "\\{.+\\}")
+str_detect("{ }", "\\{.+\\}")
+```
+
 
 
 10. Create regular expressions to find all `stringr::words` that:
@@ -281,6 +338,19 @@ str_view(spot_smaller$album_release_date, "\\d{4}-\\d{2}")
 - Start with three consonants.
 - Have two or more vowel-consonant pairs in a row.
 
+```{r}
+str_view(words, "^[^aeiouy]{3,}")
+```
+OR
+```{r}
+words |>
+  as_tibble() |>
+  filter(str_detect(value, "^[^aeiouy]{3,}"))
+```
+
+```{r}
+str_view(words, "([aeiouy][^aeiouy]){2,}")
+```
 
 ## Useful functions for handling patterns
 
@@ -303,6 +373,15 @@ spot_smaller |>
 
 
 11. In the spot_smaller dataset, how many words are in each title? (hint \\b)
+
+```{r}
+spot_smaller |>
+  select(title) |>
+  mutate(n_words = str_count(title, "\\b[^ ]+\\b"))
+
+str_view(spot_smaller$title, "\\b[^ ]+\\b")
+```
+
 
 
 12. In the spot_smaller dataset, extract the first word from every title. Show how you would print out these words as a vector and how you would create a new column on the spot_smaller tibble.  That is, produce this:
@@ -328,6 +407,37 @@ Then this:
 #10 Runnin (with A$AP Rocky, A$AP Ferg & Nicki Minaj) Runnin    
 ```
 
+```{r}
+# "^[^ ]+" all non spaces until first space
+spot_smaller |>
+  select(title) |>
+  mutate(first_word = str_extract(title, "^[^ ]+"))
+
+spot_smaller |>
+  select(title) |>
+  mutate(first_word = str_extract(title, "^[^ ]+")) |>
+  pull(first_word)
+```
+
+OR
+
+```{r}
+spot_smaller |>
+  select(title) |>
+  mutate(first_word = str_extract(title, "\\b[^ ]+\\b"))
+
+spot_smaller |>
+  select(title) |>
+  mutate(first_word = str_extract(title, "\\b[^ ]+\\b")) |>
+  pull(first_word)
+```
+
+OR
+
+```{r}
+str_extract(spot_smaller$title, "^[^ ]+\\b")
+```
+
 
 13. Which decades are popular for playlist_names? Using the bigspotify dataset, try doing each of these steps one at a time!
 
@@ -336,6 +446,17 @@ Then this:
  - use count to find how many playlists include each decade
  - what if you include both "80's" and "80s"? 
  - how can you count "80's" and "80s" together in your final tibble?
+ 
+```{r}
+bigspotify |>
+  filter(str_detect(playlist_name, "[0-9]{2}('?)s")) |> # or \\d\\d('?)s
+  mutate(decade = str_extract(playlist_name, "[0-9]{2}('?)s")) |>
+  select(playlist_name, decade) |>
+  filter(decade != "08's") |>
+  mutate(decade = str_replace(decade, "'", "")) |>
+  count(decade) 
+```
+ 
 
 
 ## Grouping and backreferences
@@ -365,16 +486,51 @@ str_view(x1, "(.)(.)(.)\\1\\2\\3")
 
 14. Describe to your groupmates what these expressions will match, and provide a word or expression as an example:
 
-- (.)\1\1
+- (.)\\1\\1
+>> any string with the same 3 characters, ex. 333, bbb, lll
+
+```{r}
+str_detect("o328fjknttt890bjfe", "(.)\\1\\1")
+str_detect("ppp", "(.)\\1\\1")
+```
+
+
 - "(.)(.)(.).*\\3\\2\\1"
+>> strings 3 characters where they appear in reverse order later in the word
+
+```{r}
+str_detect("cbef789dfgnfdj987", "(.)(.)(.).*\\3\\2\\1")
+str_detect("iuencm14lkwejrc41mfhiuwer", "(.)(.)(.).*\\3\\2\\1")
+str_detect("bbyybb", "(.)(.)(.).*\\3\\2\\1")
+```
+
 
 Which words in `stringr::words` match each expression?
+
+```{r}
+str_view(words, "(.)\\1\\1")
+
+str_view(words, "(.)(.)(.).*\\3\\2\\1")
+```
 
 
 15. Construct a regular expression to match words in `stringr::words` that contain a repeated pair of letters (e.g. “church” contains “ch” repeated twice) but *not* match repeated pairs of numbers (e.g. 507-786-3861).
 
+```{r}
+str_view(words, "([a-z]{2}).*\\1")
+
+str_detect("507-786-7861", "([a-z]{2}).*\\1")
+```
+
 
 16. Reformat the album_release_date variable in spot_smaller so that it is MM-DD-YYYY instead of YYYY-MM-DD.  (Hint: str_replace().)
+
+```{r}
+spot_smaller |>
+  mutate(release_date = str_replace(album_release_date, "(\\d{4})-(\\d{2})-(\\d{2})", "\\2-\\3-\\1")) |>
+  select(album_release_date, release_date)
+```
+
 
 
 17. BEFORE RUNNING IT, explain to your partner(s) what the following R chunk will do:
@@ -384,3 +540,147 @@ sentences %>%
   str_replace("([^ ]+) ([^ ]+) ([^ ]+)", "\\1 \\3 \\2") %>% 
   head(5)
 ```
+
+>> This is going to swap the second and third word.
+
+## NOTES:
+Most punctuation characters, like ., +, *, [, ], and ?, have special meanings and are called metacharacters. 
+
+# . will match any character "a." will match any string that contains an “a” followed by another character:
+
+str_view(fruit, "a...e") *“a”, followed by three letters, followed by an “e”* 
+
+# ? makes a pattern optional (i.e. it matches 0 or 1 times)
+
+str_view(c("a", "ab", "abb"), "ab?") *ab? matches an "a", optionally followed by a "b"*
+> [1] │ <a>
+> [2] │ <ab>
+> [3] │ <ab>b
+
+# + lets a pattern repeat (i.e. it matches at least once)
+
+str_view(c("a", "ab", "abb"), "ab+")  *ab+ matches an "a", followed by at least one "b"*
+> [2] │ <ab>
+> [3] │ <abb>
+
+# * lets a pattern be optional or repeat (i.e. it matches any number of times, including 0).
+
+ab* matches an "a", followed by any number of "b"s.
+str_view(c("a", "ab", "abb"), "ab*")
+> [1] │ <a>
+> [2] │ <ab>
+> [3] │ <abb>
+
+
+# Character classes defined by []
+
+[abcd] matches “a”, “b”, “c”, or “d”.
+
+[^abcd] matches anything except “a”, “b”, “c”, or “d”.
+
+str_view(words, "[aeiou]x[aeiou]") *words containing an “x” surrounded by vowels*
+> [284] │ <exa>ct
+> [285] │ <exa>mple
+> [288] │ <exe>rcise
+> [289] │ <exi>st
+
+str_view(words, "[^aeiou]y[^aeiou]") *a “y” surrounded by consonants:*
+#> [836] │ <sys>tem
+#> [901] │ <typ>e
+
+# alternation, |, to pick between one or more alternative patterns
+
+str_view(fruit, "apple|melon|nut") *fruits containing “apple”, “melon”, or “nut”*
+>  [1] │ <apple>
+> [13] │ canary <melon>
+> [20] │ coco<nut>
+> [52] │ <nut>
+> [62] │ pine<apple>
+> [72] │ rock <melon>
+
+str_view(fruit, "aa|ee|ii|oo|uu") *repeated vowel*
+>  [9] │ bl<oo>d orange
+> [33] │ g<oo>seberry
+> [47] │ lych<ee>
+> [66] │ purple mangost<ee>n
+
+#regular expressions are case sensitive.
+method: 
+Use str_to_lower() to convert the names to lower case: str_count(str_to_lower(name), "[aeiou]")
+
+str_count(name, regex("[aeiou]", ignore_case = TRUE))
+
+str_count(name, "[aeiouAEIOU]")
+
+
+#anchor the regular expression using ^ to match the start
+
+#anchor the regular expression using $ to match the end
+
+#force a regular expression to match only the full string, anchor it with both ^ and $
+str_view(fruit, "apple")
+>  [1] │ <apple>
+> [62] │ pine<apple>
+
+str_view(fruit, "^apple$")
+> [1] │ <apple>
+
+boundary between words (i.e. the start or end of a word) with \b
+
+When used alone, anchors will produce a zero-width match
+str_view("abc", c("$", "^", "\\b"))
+> [1] │ abc<>
+> [2] │ <>abc
+> [3] │ <>abc<>
+
+#inside character classes 
+- defines a range, e.g., [a-z] matches any lower case letter and [0-9] matches any number
+\ escapes special characters, so [\^\-\]] matches ^, -, or ]
+
+
+x <- "abcd ABCD 12345 -!@#%."
+str_view(x, "[abc]+")
+> [1] │ <abc>d ABCD 12345 -!@#%.
+
+str_view(x, "[a-z]+")
+> [1] │ <abcd> ABCD 12345 -!@#%.
+
+str_view(x, "[^a-z0-9]+") *not lowercase a to z or a digit*
+> [1] │ abcd< ABCD >12345< -!@#%.>
+
+\d matches any digit;
+\D matches anything that isn’t a digit.
+\s matches any whitespace (e.g., space, tab, newline);
+\S matches anything that isn’t whitespace.
+\w matches any “word” character, i.e. letters and numbers;
+\W matches any “non-word” character.
+
+#quantifiers
+{n} matches exactly n times.
+{n,} matches at least n times.
+{n,m} matches between n and m times.
+
+# parentheses have another important effect: they create capturing groups that allow you to use sub-components of the match
+
+\1 refers to the match contained in the first parenthesis, \2 in the second parenthesis
+
+str_view(fruit, "(..)\\1") *any two but repeated*
+>  [4] │ b<anan>a
+> [20] │ <coco>nut
+> [22] │ <cucu>mber
+> [41] │ <juju>be
+> [56] │ <papa>ya
+> [73] │ s<alal> berry
+
+want to use parentheses without creating matching groups. You can create a non-capturing group with (?:)
+
+x <- c("a gray cat", "a grey dog")
+str_match(x, "gr(e|a)y")
+>      [,1]   [,2]
+> [1,] "gray" "a" 
+> [2,] "grey" "e"
+
+str_match(x, "gr(?:e|a)y")
+>      [,1]  
+> [1,] "gray"
+> [2,] "grey"

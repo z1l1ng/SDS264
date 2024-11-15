@@ -13,7 +13,9 @@ We will build on techniques you learned in SDS 164 using parts of [Text Mining w
 
 ```{r}
 #| include: FALSE
-
+library(httr2)
+library(htmltools)
+library(httr)
 library(tidyverse)
 library(tidytext)
 library(textdata)
@@ -22,6 +24,7 @@ library(wordcloud2)
 library(viridis)
 library(ggthemes)
 library(gutenbergr)
+library(rvest)
 ```
 
 ## Text analysis of books from Project Gutenberg
@@ -49,7 +52,7 @@ We will use the `gutenbergr` package to obtain several works from [Project Guten
 
 library(RCurl)
 #three_works <- read_csv(
-  #file = getURL("https://raw.githubusercontent.com/proback/264_fall_2024/refs/heads/main/Data/three_works.csv"))
+  #file = getURL("https://raw.githubusercontent.com/proback/264_fall_2024/refs/heads/main/Data/three_works.csv", .encoding = "UTF-8"))
 
 three_works <- read_csv("Class Files/00_Data/three_works.csv")
 three_works |> count(title)
@@ -211,7 +214,7 @@ words_df <- words |>
 wordcloud2(
   words_df, 
   size = .25, 
-  shape = 'circle',
+  shape = 'star',
   minSize = 10
 )
 
@@ -671,7 +674,7 @@ The `potter_untidy` dataset includes the text of 7 books of the Harry Potter ser
 # potter_untidy <- read_csv("Data/potter_untidy.csv")
 
 potter_untidy <- read_csv(
-  file = getURL("https://raw.githubusercontent.com/proback/264_fall_2024/refs/heads/main/Data/potter_untidy.csv")) |>
+  file = getURL("https://raw.githubusercontent.com/proback/264_fall_2024/refs/heads/main/Data/potter_untidy.csv", .encoding = "UTF-8")) |>
   mutate(title = fct_reorder(title, book_num))
 
 potter_untidy
@@ -685,7 +688,7 @@ potter_tidy
 # potter_locations <- read_csv("Data/potterlocations.csv")
 
 potter_locations <- read_csv(
-  file = getURL("https://raw.githubusercontent.com/proback/264_fall_2024/refs/heads/main/Data/potterlocations.csv")) |>
+  file = getURL("https://raw.githubusercontent.com/proback/264_fall_2024/refs/heads/main/Data/potterlocations.csv", .encoding = "UTF-8")) |>
   mutate(value = str_to_lower(value))
 
 potter_locations
@@ -693,7 +696,7 @@ potter_locations
 # potter_names <- read_csv("https://proback.github.io/264_fall_2024/Data/potternames.csv") |>
 # potter_names <- read_csv("Data/potternames.csv") |>
 potter_names <- read_csv(
-  file = getURL("https://raw.githubusercontent.com/proback/264_fall_2024/refs/heads/main/Data/potternames.csv")) |>
+  file = getURL("https://raw.githubusercontent.com/proback/264_fall_2024/refs/heads/main/Data/potternames.csv", .encoding = "UTF-8")) |>
   mutate(fullname = str_to_lower(fullname),
          firstname = str_to_lower(firstname),
          lastname = str_to_lower(lastname))
@@ -703,7 +706,7 @@ potter_names
 # potter_spells <- read_csv("https://proback.github.io/264_fall_2024/Data/potter_spells.csv") |>
 # potter_spells <- read_csv("Data/potter_spells.csv") |>
 potter_spells <- read_csv(
-  file = getURL("https://raw.githubusercontent.com/proback/264_fall_2024/refs/heads/main/Data/potter_spells.csv")) |>
+  file = getURL("https://raw.githubusercontent.com/proback/264_fall_2024/refs/heads/main/Data/potter_spells.csv", .encoding = "UTF-8")) |>
   filter(spell_name != "Point Me")
 
 potter_spells
@@ -775,17 +778,120 @@ potter_tidy |>
 
 1. What words contribute the most to negative and positive sentiment scores?  Show a faceted bar plot of the top 10 negative and the top 10 positive words (according to the "bing" lexicon) across the entire series.
 
+```{r}
+# potter_tidy |>
+#   inner_join(bing_sentiments, relationship = "many-to-many") |>
+#   count(sentiment, word, sort = TRUE) |>
+#   group_by(sentiment) |>
+#   slice_max(n, n=10) |>
+#   ungroup() |>
+#   ggplot(aes(x = fct_reorder(word, n), y = n, fill = sentiment)) +
+#   geom_col() +
+#   coord_flip() +
+#   facet_wrap(~ sentiment, scales = "free")
+
+potter_tidy |>
+  inner_join(bing_sentiments, relationship = "many-to-many") |>
+  count(sentiment, word, sort = TRUE) |>
+  group_by(sentiment) |>
+  slice_max(n, n=10) |>
+  ungroup() |>
+  ggplot(aes(x = fct_reorder(word, n), y = n, fill = sentiment)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ sentiment, scales = "free") +
+  coord_flip()
+```
 
 2. Find a list of the top 10 words associated with "fear" and with "trust" (according to the "nrc" lexicon) across the entire series.
+
+```{r}
+sentiments_nrc <- get_sentiments(lexicon = "nrc")
+
+sentiments_nrc |>
+  filter(sentiment == "fear" | sentiment == "trust") |>
+  inner_join(potter_tidy, relationship = "many-to-many") |>
+  count(sentiment, word, sort = TRUE) |>
+  group_by(sentiment) |>
+  slice_max(n, n=10) |>
+  ungroup() |>
+  ggplot(aes(x = fct_reorder(word, n), y = n, fill = sentiment)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ sentiment, scales = "free") +
+  coord_flip()
+```
 
 
 3. Make a wordcloud for the entire series after removing stop words using the "smart" source.
 
+```{r}
+potter_words <- potter_tidy |>
+  anti_join(smart_stopwords) |>
+  anti_join(potter_names, join_by(word == firstname)) |>
+  anti_join(potter_names, join_by(word == lastname)) |>
+  count(word) |>
+  arrange(desc(n))
+
+set.seed(1234)
+wordcloud(
+    words = potter_words$word,
+    freq = potter_words$n,
+    scale=c(3,0.3),
+    max.words = 100, 
+    random.order = FALSE, 
+    rot.per = 0,            
+    colors = brewer.pal(4, "Dark2"))
+```
+
 
 4. Create a wordcloud with the top 20 negative words and the top 20 positive words in the Harry Potter series according to the bing lexicon.  The words should be sized by their respective counts and colored based on whether their sentiment is positive or negative.  (Feel free to be resourceful and creative to color words by a third variable!)
 
+```{r}
+sent_potter <- bing_sentiments |>
+  inner_join(potter_tidy, relationship = "many-to-many") |>
+  count(sentiment, word, sort = TRUE) |>
+  group_by(sentiment) |>
+  slice_max(n, n=20) |>
+  mutate(
+    sentiment = ifelse(sentiment == "positive", "green", "red")
+  )
+
+wordcloud(
+    words = sent_potter$word,
+    freq = sent_potter$n,
+    random.order = FALSE,
+    max.words = 100,
+    ordered.colors = TRUE,
+    color = sent_potter$sentiment)
+
+# sent_potter <- potter_tidy |>
+#   inner_join(bing_sentiments, relationship = "many-to-many") |>
+#   count(sentiment, word, sort = TRUE) |>
+#   group_by(sentiment) |>
+#   slice_max(n, n=20)
+# 
+# set.seed(1234)
+# wordcloud(
+#     words = sent_potter$word,
+#     freq = sent_potter$n,
+#     random.order = FALSE,
+#     ordered.colors = TRUE,
+#     color = brewer.pal(4, "Dark2")[factor(sent_potter$sentiment)])
+
+```
+
 
 5. Make a faceted bar chart to compare the positive/negative sentiment trajectory over the 7 Harry Potter books.  You should have one bar per chapter (thus chapter becomes the index), and the bar should extend up from 0 if there are more positive than negative words in a chapter (according to the "bing" lexicon), and it will extend down from 0 if there are more negative than positive words.
+
+```{r}
+bing_sentiments |>
+  inner_join(potter_tidy, relationship = "many-to-many") |>
+  count(title, chapter, sentiment, sort = TRUE) |>
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) |>
+  mutate(sentiment = positive - negative) |>
+  ggplot(aes(x = chapter, y = sentiment, fill = title)) +
+  geom_col(show.legend = FALSE) +
+    facet_wrap(~title, ncol = 2, scales = "free_x")
+```
 
 
 6. Repeat (5) using a faceted scatterplot to show the average sentiment score according to the "afinn" lexicon for each chapter.  (Hint: use `mutate(chapter_factor = factor(chapter))` to treat chapter as a factor variable.)

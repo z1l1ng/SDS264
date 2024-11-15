@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Strings: Extra Practice (Part 3)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="12_strings_part3_files/libs/clipboard/clipboard.min.js"></script>
+<script src="12_strings_part3_files/libs/quarto-html/quarto.js"></script>
+<script src="12_strings_part3_files/libs/quarto-html/popper.min.js"></script>
+<script src="12_strings_part3_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="12_strings_part3_files/libs/quarto-html/anchor.min.js"></script>
+<link href="12_strings_part3_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="12_strings_part3_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="12_strings_part3_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="12_strings_part3_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="12_strings_part3_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Strings: Extra Practice (Part 3)</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>You can download this .qmd file from <a href="https://github.com/proback/264_fall_2024/blob/main/12_strings_part3.qmd">here</a>. Just hit the Download Raw File button.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rvest)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(httr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="on-your-own---extra-practice-with-strings-and-regular-expressions" class="level2">
+<h2 class="anchored" data-anchor-id="on-your-own---extra-practice-with-strings-and-regular-expressions">On Your Own - Extra practice with strings and regular expressions</h2>
+<ol type="1">
+<li>Describe the equivalents of ?, +, * in {m,n} form.</li>
+</ol>
+<blockquote class="blockquote">
+<blockquote class="blockquote">
+<p>? makes a pattern optional (i.e.&nbsp;it matches 0 or 1 times), so in {m,n} form it would be represented as {0, 1}</p>
+</blockquote>
+</blockquote>
+<blockquote class="blockquote">
+<blockquote class="blockquote">
+<ul>
+<li>lets a pattern repeat (i.e.&nbsp;it matches at least once), so in {m,n} form it would be represented {1, }</li>
+</ul>
+</blockquote>
+</blockquote>
+<blockquote class="blockquote">
+<blockquote class="blockquote">
+<ul>
+<li>lets a pattern be optional or repeats, so in {m,n} form it would be represented as {0, }</li>
+</ul>
+</blockquote>
+</blockquote>
+<ol start="2" type="1">
+<li>Describe, in words, what the expression “(.)(.)\2\1” will match, and provide a word or expression as an example.</li>
+</ol>
+<blockquote class="blockquote">
+<blockquote class="blockquote">
+<p>The expression “(.)(.)\2\1” would match any 2 character, digit, or special character and then those 2 characters, digit, or special character in reverse order, with nothing in between. The \2 is saying take look for whatever is in our second set of parentheses and \1 is saying whatever is in our first set of parentheses.</p>
+</blockquote>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># an &amp; na</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str_detect</span>(<span class="st">"anna"</span>, <span class="st">"(.)(.)</span><span class="sc">\\</span><span class="st">2</span><span class="sc">\\</span><span class="st">1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># %0 &amp; 0%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str_detect</span>(<span class="st">"yhbfvh%00%"</span>, <span class="st">"(.)(.)</span><span class="sc">\\</span><span class="st">2</span><span class="sc">\\</span><span class="st">1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#  il &amp; li</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str_detect</span>(<span class="st">"millionaire"</span>, <span class="st">"(.)(.)</span><span class="sc">\\</span><span class="st">2</span><span class="sc">\\</span><span class="st">1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+<ol start="3" type="1">
+<li>Produce an R string which the regular expression represented by “\..\..\..” matches. In other words, find a string <code>y</code> below that produces a TRUE in <code>str_detect</code>.</li>
+</ol>
+<blockquote class="blockquote">
+<blockquote class="blockquote">
+<p>This regular expression is looking for a . represented by \. followed by any character, digit, or special character, then another . represented by \. followed by any character, digit, or special character and then another . represented by \. followed by any character, digit, or special character, thus giving it the form “.z.z.z” where z can be any character, digit, or special character. Note: the string doesn’t have to be by itself.</p>
+</blockquote>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_view</span>(<span class="st">"tyu iny^.^.0.E..  ... ....."</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">..</span><span class="sc">\\</span><span class="st">..</span><span class="sc">\\</span><span class="st">.."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] │ tyu iny^&lt;.^.0.E&gt;..  &lt;... ..&gt;...</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_detect</span>(<span class="st">"tyu iny^.^.0.E..  ... ....."</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">..</span><span class="sc">\\</span><span class="st">..</span><span class="sc">\\</span><span class="st">.."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_view</span>(<span class="st">"ziling.....zhen"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">..</span><span class="sc">\\</span><span class="st">..</span><span class="sc">\\</span><span class="st">.."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] │ ziling&lt;.....z&gt;hen</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_detect</span>(<span class="st">"ziling.....zhen"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">..</span><span class="sc">\\</span><span class="st">..</span><span class="sc">\\</span><span class="st">.."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_view</span>(<span class="st">".a.b.c"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">..</span><span class="sc">\\</span><span class="st">..</span><span class="sc">\\</span><span class="st">.."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] │ &lt;.a.b.c&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_detect</span>(<span class="st">".a.b.c"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">..</span><span class="sc">\\</span><span class="st">..</span><span class="sc">\\</span><span class="st">.."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+<ol start="4" type="1">
+<li>Solve with <code>str_subset()</code>, using the words from <code>stringr::words</code>:</li>
+</ol>
+<ul>
+<li>Find all words that start or end with x.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_subset</span>(words, <span class="st">"^x|x$"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "box" "sex" "six" "tax"</code></pre>
+</div>
+</div>
+<ul>
+<li>Find all words that start with a vowel and end with a consonant.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_subset</span>(words, <span class="st">"^[aieou].*[^aieou]$"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] "about"       "accept"      "account"     "across"      "act"        
+  [6] "actual"      "add"         "address"     "admit"       "affect"     
+ [11] "afford"      "after"       "afternoon"   "again"       "against"    
+ [16] "agent"       "air"         "all"         "allow"       "almost"     
+ [21] "along"       "already"     "alright"     "although"    "always"     
+ [26] "amount"      "and"         "another"     "answer"      "any"        
+ [31] "apart"       "apparent"    "appear"      "apply"       "appoint"    
+ [36] "approach"    "arm"         "around"      "art"         "as"         
+ [41] "ask"         "at"          "attend"      "authority"   "away"       
+ [46] "awful"       "each"        "early"       "east"        "easy"       
+ [51] "eat"         "economy"     "effect"      "egg"         "eight"      
+ [56] "either"      "elect"       "electric"    "eleven"      "employ"     
+ [61] "end"         "english"     "enjoy"       "enough"      "enter"      
+ [66] "environment" "equal"       "especial"    "even"        "evening"    
+ [71] "ever"        "every"       "exact"       "except"      "exist"      
+ [76] "expect"      "explain"     "express"     "identify"    "if"         
+ [81] "important"   "in"          "indeed"      "individual"  "industry"   
+ [86] "inform"      "instead"     "interest"    "invest"      "it"         
+ [91] "item"        "obvious"     "occasion"    "odd"         "of"         
+ [96] "off"         "offer"       "often"       "okay"        "old"        
+[101] "on"          "only"        "open"        "opportunity" "or"         
+[106] "order"       "original"    "other"       "ought"       "out"        
+[111] "over"        "own"         "under"       "understand"  "union"      
+[116] "unit"        "university"  "unless"      "until"       "up"         
+[121] "upon"        "usual"      </code></pre>
+</div>
+</div>
+<ul>
+<li>Find all words that start and end with the same letter</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_subset</span>(words, <span class="st">"^(.).*</span><span class="sc">\\</span><span class="st">1$"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "america"    "area"       "dad"        "dead"       "depend"    
+ [6] "educate"    "else"       "encourage"  "engine"     "europe"    
+[11] "evidence"   "example"    "excuse"     "exercise"   "expense"   
+[16] "experience" "eye"        "health"     "high"       "knock"     
+[21] "level"      "local"      "nation"     "non"        "rather"    
+[26] "refer"      "remember"   "serious"    "stairs"     "test"      
+[31] "tonight"    "transport"  "treat"      "trust"      "window"    
+[36] "yesterday" </code></pre>
+</div>
+</div>
+<ol start="5" type="1">
+<li>What words in <code>stringr::words</code> have the highest number of vowels? What words have the highest proportion of vowels? (Hint: what is the denominator?) Figure this out using the tidyverse and piping, starting with <code>as_tibble(words) |&gt;</code>.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># most vowels</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">as_tibble</span>(words) <span class="sc">|&gt;</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n_vowels =</span> <span class="fu">str_count</span>(value, <span class="st">"[aieou]"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n_vowels))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 980 × 2
+   value       n_vowels
+   &lt;chr&gt;          &lt;int&gt;
+ 1 appropriate        5
+ 2 associate          5
+ 3 available          5
+ 4 colleague          5
+ 5 encourage          5
+ 6 experience         5
+ 7 individual         5
+ 8 television         5
+ 9 absolute           4
+10 achieve            4
+# ℹ 970 more rows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># proportion of vowels</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">as_tibble</span>(words) <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n_vowels =</span> <span class="fu">str_count</span>(value, <span class="st">"[aieou]"</span>),</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">word_length =</span> <span class="fu">str_length</span>(value),</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">prop_vowels =</span> n_vowels<span class="sc">/</span>word_length) <span class="sc">|&gt;</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(prop_vowels))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 980 × 4
+   value  n_vowels word_length prop_vowels
+   &lt;chr&gt;     &lt;int&gt;       &lt;int&gt;       &lt;dbl&gt;
+ 1 a             1           1       1    
+ 2 area          3           4       0.75 
+ 3 idea          3           4       0.75 
+ 4 age           2           3       0.667
+ 5 ago           2           3       0.667
+ 6 air           2           3       0.667
+ 7 die           2           3       0.667
+ 8 due           2           3       0.667
+ 9 eat           2           3       0.667
+10 europe        4           6       0.667
+# ℹ 970 more rows</code></pre>
+</div>
+</div>
+<ol start="6" type="1">
+<li>From the Harvard sentences data, use <code>str_extract</code> to produce a tibble with 3 columns: the sentence, the first word in the sentence, and the first word ending in “ed” (NA if there isn’t one).</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as_tibble</span>(sentences) <span class="sc">|&gt;</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">first_word =</span> <span class="fu">str_extract</span>(value, <span class="st">"^[^ ]+</span><span class="sc">\\</span><span class="st">b"</span>),</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">first_word_ed =</span> <span class="fu">str_extract</span>(value, <span class="st">"</span><span class="sc">\\</span><span class="st">b</span><span class="sc">\\</span><span class="st">w*ed</span><span class="sc">\\</span><span class="st">b"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 720 × 3
+   value                                       first_word first_word_ed
+   &lt;chr&gt;                                       &lt;chr&gt;      &lt;chr&gt;        
+ 1 The birch canoe slid on the smooth planks.  The        &lt;NA&gt;         
+ 2 Glue the sheet to the dark blue background. Glue       &lt;NA&gt;         
+ 3 It's easy to tell the depth of a well.      It's       &lt;NA&gt;         
+ 4 These days a chicken leg is a rare dish.    These      &lt;NA&gt;         
+ 5 Rice is often served in round bowls.        Rice       served       
+ 6 The juice of lemons makes fine punch.       The        &lt;NA&gt;         
+ 7 The box was thrown beside the parked truck. The        parked       
+ 8 The hogs were fed chopped corn and garbage. The        fed          
+ 9 Four hours of steady work faced us.         Four       faced        
+10 A large size in stockings is hard to sell.  A          &lt;NA&gt;         
+# ℹ 710 more rows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># str_view(sentences, "\\b\\w*ed\\b")</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="co"># "^[^ ]+\\b" first word</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol start="7" type="1">
+<li>Find and output all contractions (words with apostrophes) in the Harvard sentences, assuming no sentence has multiple contractions.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_view</span>(sentences, <span class="st">"</span><span class="sc">\\</span><span class="st">w*'</span><span class="sc">\\</span><span class="st">w</span><span class="sc">\\</span><span class="st">b"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [3] │ &lt;It's&gt; easy to tell the depth of a well.
+ [18] │ The soft cushion broke the &lt;man's&gt; fall.
+[104] │ Open the crate but &lt;don't&gt; break the glass.
+[180] │ Add the &lt;store's&gt; account to the last cent.
+[303] │ The beam dropped down on the &lt;workman's&gt; head.
+[308] │ &lt;Let's&gt; all join as we sing the last chorus.
+[326] │ The copper bowl shone in the &lt;sun's&gt; rays.
+[348] │ A &lt;child's&gt; wit saved the day for us.
+[357] │ A ripe plum is fit for a &lt;king's&gt; palate.
+[393] │ &lt;It's&gt; a dense crowd in two distinct ways.
+[477] │ We &lt;don't&gt; get much money but we have fun.
+[513] │ Ripe pears are fit for a &lt;queen's&gt; table.
+[536] │ Cheap clothes are flashy but &lt;don't&gt; last.
+[624] │ The facts &lt;don't&gt; always show who is right.
+[636] │ Pack the kits and &lt;don't&gt; forget the salt.
+[678] │ We &lt;don't&gt; like to admit our small faults.
+[680] │ Dig deep in the earth for &lt;pirate's&gt; gold.
+[713] │ She saw a cat in the &lt;neighbor's&gt; house.</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<blockquote class="blockquote">
+<p>This prints out all the words with apostrophes in the Harvard sentences, note that words like store’s, mans’s, king’s, queen’s, etc are showing up as well.</p>
+</blockquote>
+</blockquote>
+<ol start="8" type="1">
+<li><em>Carefully</em> explain what the code below does, both line by line and in general terms.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>temp <span class="ot">&lt;-</span> <span class="fu">str_replace_all</span>(words, <span class="st">"^([A-Za-z])(.*)([a-z])$"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">3</span><span class="sc">\\</span><span class="st">2</span><span class="sc">\\</span><span class="st">1"</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">as_tibble</span>(words) <span class="sc">|&gt;</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">semi_join</span>(<span class="fu">as_tibble</span>(temp)) <span class="sc">|&gt;</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="cn">Inf</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(value)`</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 45 × 1
+   value     
+   &lt;chr&gt;     
+ 1 a         
+ 2 america   
+ 3 area      
+ 4 dad       
+ 5 dead      
+ 6 deal      
+ 7 dear      
+ 8 depend    
+ 9 dog       
+10 educate   
+11 else      
+12 encourage 
+13 engine    
+14 europe    
+15 evidence  
+16 example   
+17 excuse    
+18 exercise  
+19 expense   
+20 experience
+21 eye       
+22 god       
+23 health    
+24 high      
+25 knock     
+26 lead      
+27 level     
+28 local     
+29 nation    
+30 no        
+31 non       
+32 on        
+33 rather    
+34 read      
+35 refer     
+36 remember  
+37 serious   
+38 stairs    
+39 test      
+40 tonight   
+41 transport 
+42 treat     
+43 trust     
+44 window    
+45 yesterday </code></pre>
+</div>
+</div>
+</section>
+<section id="coco-and-rotten-tomatoes" class="level2">
+<h2 class="anchored" data-anchor-id="coco-and-rotten-tomatoes">Coco and Rotten Tomatoes</h2>
+<p>We will check out the Rotten Tomatoes page for the 2017 movie Coco, scrape information from that page (we’ll get into web scraping in a few weeks!), clean it up into a usable format, and answer some questions using strings and regular expressions.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># used to work</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="co"># coco &lt;- read_html("https://www.rottentomatoes.com/m/coco_2017")</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>robotstxt<span class="sc">::</span><span class="fu">paths_allowed</span>(<span class="st">"https://www.rottentomatoes.com/m/coco_2017"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+ www.rottentomatoes.com                      </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(polite)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>coco <span class="ot">&lt;-</span> <span class="st">"https://www.rottentomatoes.com/m/coco_2017"</span> <span class="sc">|&gt;</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bow</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scrape</span>()</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>top_reviews <span class="ot">&lt;-</span> </span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://www.rottentomatoes.com/m/coco_2017/reviews?type=top_critics"</span> <span class="sc">|&gt;</span> </span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bow</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scrape</span>()</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>top_reviews <span class="ot">&lt;-</span> <span class="fu">html_nodes</span>(top_reviews, <span class="st">".review-text"</span>)</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>top_reviews <span class="ot">&lt;-</span> <span class="fu">html_text</span>(top_reviews)</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>user_reviews <span class="ot">&lt;-</span> </span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://www.rottentomatoes.com/m/coco_2017/reviews?type=user"</span> <span class="sc">|&gt;</span> </span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bow</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scrape</span>()</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>user_reviews <span class="ot">&lt;-</span> <span class="fu">html_nodes</span>(user_reviews, <span class="st">".js-review-text"</span>)</span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>user_reviews <span class="ot">&lt;-</span> <span class="fu">html_text</span>(user_reviews)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol start="9" type="1">
+<li><code>top_reviews</code> is a character vector containing the 20 most recent critic reviews (along with some other junk) for Coco, while <code>user_reviews</code> is a character vector with the 10 most recent user reviews.</li>
+</ol>
+<ol type="a">
+<li>Explain how the code below helps clean up both <code>user_reviews</code> and <code>top_reviews</code> before we start using them.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>user_reviews <span class="ot">&lt;-</span> <span class="fu">str_trim</span>(user_reviews)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>top_reviews <span class="ot">&lt;-</span> <span class="fu">str_trim</span>(top_reviews)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<blockquote class="blockquote">
+<blockquote class="blockquote">
+<p>We remove the whitespace from the start and end of the strings in user_review and topreviw</p>
+</blockquote>
+</blockquote>
+<ol start="2" type="a">
+<li>Print out the critic reviews where the reviewer mentions “emotion” or “cry”. Think about various forms (“cried”, “emotional”, etc.) You may want to turn reviews to all lower case before searching for matches.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_subset</span>(<span class="fu">str_to_lower</span>(user_reviews), <span class="st">"cry|cried|emotional|sad|devasted"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "such an emotional cultural movie. so good!"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+[2] "made me cry many times. sensational!"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+[3] "*coco* is a stunning masterpiece from pixar that beautifully captures the essence of mexican culture while exploring themes of death, grief, and family. the film’s vibrant atmosphere immerses viewers in a world filled with color and music, making it a feast for the senses. the heartfelt story follows young miguel as he navigates the land of the dead, learning about his family’s past and the importance of remembering loved ones. the songs are not only catchy but also deeply emotional, enhancing the narrative and leaving a lasting impression. the plot twist adds depth to the story, making it even more impactful. while it evokes tears, it's in a profoundly beautiful way, ensuring that it resonates with both children and adults alike. this film is undoubtedly one of the best pixar offerings of the last decade, reminding us that love and family connections transcend even death. perfect for family viewing, *coco* is a film that lingers in the heart."
+[4] "animations give way to ideas such as &lt;i&gt;coco&lt;/i&gt; to be conveyed through a medium that is so lively and magical. it excels in its message that feels ever so resonant, while simultaneously being profoundly inspirational and emotional."                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     </code></pre>
+</div>
+</div>
+<ol start="3" type="a">
+<li>In critic reviews, replace all instances where “Pixar” is used with its full name: “Pixar Animation Studios”.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_replace</span>(top_reviews, <span class="st">"Pixar"</span>, <span class="st">"Pixar Animation Studios"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "A fine addition to the Pixar Animation Studios legacy… a very sweet film about family, very thoughtfully put together. It has that unmistakable mixture of comedy and sentiment that you associate with a Pixar movie. Great fun."                                          
+ [2] "An unexpectedly brilliant and dynamic story about lineage, connection, and self-discovery."                                                                                                                                                                                 
+ [3] "In a country with an ever increasing Hispanic and Mexican population, a film like Coco should have come around a long time ago."                                                                                                                                            
+ [4] "I don't think there's any question that Coco is really great."                                                                                                                                                                                                              
+ [5] "Several times I found myself sobbing without knowing exactly why only to realize why the scene had hit me so hard a few minutes later."                                                                                                                                     
+ [6] "A wonderful return to form for Pixar Animation Studios, who again deliver the emotional and creative goods while exploring other cultures with a genuine, tangible, love and respect."                                                                                      
+ [7] "The film has a galloping rhythm, and the animation is scrupulous and ravishing, from its smallest details to its limitless landscapes."                                                                                                                                     
+ [8] "On paper, the mythology scans as complicated and dark, but in the capable hands of Academy Award winner Lee Unkrich and Pixar Animation Studios veteran Adrian Molina, Coco is accessible for even the youngest cinema patrons."                                            
+ [9] "Pixar Animation Studios's latest project is a glittering return to non-franchise form after 2015's lacklustre The Good Dinosaur."                                                                                                                                           
+[10] "Its victorious denouement offers everyone a different way to think about what it means to live on, and how that starts by treating those dearest to us well."                                                                                                               
+[11] "At worst it suggests that the brains trust at Pixar Animation Studios, after 22 years of peerless output (Toy Story was 1995), is finally eating itself. At best, well, it's a superbly polished, technically flawless family film that makes you cry. And this is bad how?"
+[12] "Funny, irreverent and eye-popping. It will also make you want to cry at least once but possibly as many as three times."                                                                                                                                                    
+[13] "This is a charming and very memorable film."                                                                                                                                                                                                                                
+[14] "Despite the fact that it's so well told and really beautifully directed, it doesn't have as investing a story as I would have liked because it does feel like other things we've seen before. But still, this is a good movie."                                             
+[15] "... Coco is another triumph for Pixar Animation Studios..."                                                                                                                                                                                                                 
+[16] "Funny and heart-tugging with some knockout tunes, the movie glows with warmth. And how many kids' cartoons would include a running Frida Kahlo gag? One to treasure."                                                                                                       
+[17] "Not top-tier Pixar Animation Studios. But decent enough."                                                                                                                                                                                                                   
+[18] "Pixar Animation Studios has raised the animation bar again, with its most musical - and arguably most magical - film yet. If this is the afterlife we're all headed to, don't fear the reaper."                                                                             
+[19] "While the animation is Pixar Animation Studios perfect, I don't think the story grips the viewer."                                                                                                                                                                          
+[20] "Every plot point and thematic implication slots into place, but the pleasures of Coco are above all visual. I don't think I've ever seen a computer-animated film so rich in detail, or so dedicated to recreating complex and beautiful lighting schemes."                 </code></pre>
+</div>
+</div>
+<ol start="4" type="a">
+<li>Find out how many times each user uses “I” in their review. Remember that it could be used as upper or lower case, at the beginning, middle, or end of a sentence, etc.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_count</span>(<span class="fu">str_to_lower</span>(user_reviews), <span class="st">"</span><span class="sc">\\</span><span class="st">b(i)</span><span class="sc">\\</span><span class="st">b"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 0 0 0 3 0 0 3 1 4 2 0 0 0 1 0 0 1 2 0 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_count</span>(<span class="fu">str_to_lower</span>(user_reviews), <span class="st">"[i]"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1]  3  4  5 43  2  2 15 31 37 33  1  3 15  5  3 64 27 20  4  7</code></pre>
+</div>
+</div>
+<ol start="5" type="a">
+<li>Do critics or users have more complex reviews, as measured by average number of commas used? Be sure your code weeds out commas used in numbers, such as “12,345”.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">str_count</span>(<span class="fu">str_to_lower</span>(top_reviews), <span class="st">"[^</span><span class="sc">\\</span><span class="st">d],"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.35</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">str_count</span>(<span class="fu">str_to_lower</span>(user_reviews), <span class="st">"[^</span><span class="sc">\\</span><span class="st">d],"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.2</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<blockquote class="blockquote">
+<p>Users have a mean use of 2.2 commas and critics have a mean use of 1.35.</p>
+</blockquote>
+</blockquote>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

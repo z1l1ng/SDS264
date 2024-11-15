@@ -102,12 +102,18 @@ as_tibble(sentences) |>
          first_word_ed = str_extract(value, "\\b\\w*ed\\b"))
 
 # str_view(sentences, "\\b\\w*ed\\b")
+# "^[^ ]+\\b" first word
 ```
 
->> "^[^ ]+\\b" first word
+
 
 7. Find and output all contractions (words with apostrophes) in the Harvard sentences, assuming no sentence has multiple contractions.
 
+```{r}
+str_view(sentences, "\\w*'\\w\\b")
+```
+
+>> This prints out all the words with apostrophes in the Harvard sentences, note that words like store's, mans's, king's, queen's, etc are showing up as well.
 
 8. *Carefully* explain what the code below does, both line by line and in general terms.
 

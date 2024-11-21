@@ -5,7 +5,7 @@ format:
 editor_options: 
   chunk_output_type: console
 ---
-  
+
 ### Part 1:
 
 Instructions for Creating Shiny App in Rmarkdown

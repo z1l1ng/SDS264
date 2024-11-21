@@ -723,7 +723,7 @@ potter_tidy |>
   group_by(title) |>
   slice_max(n, n = 10) |>
   mutate(rank = 1:10) |>
-   select(-n) |>
+  select(-n) |>
   pivot_wider (names_from = title, values_from = word) |>
   print(width = Inf)
 

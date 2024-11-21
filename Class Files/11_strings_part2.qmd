@@ -218,7 +218,7 @@ str_view(words, "^.......") #OR
 str_view(words, "^.{7}") 
 
 #Start with a vowel.
-str_view(words, "^[aeiou]")
+str_view(words, r)
 
 #End with ed, but not with eed
 str_view(words, "[^e]ed$")

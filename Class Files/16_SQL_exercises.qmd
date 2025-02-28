@@ -1,7 +1,7 @@
 ---
 title: "SQL: Exercises"
 format:
-  html: default
+  pdf: default
 execute:
   echo: true
   warning: false
@@ -25,8 +25,6 @@ library(DBI)
 ```
 
 ```{r}
-#| eval: FALSE
-
 # connect to the database which lives on a remote server maintained by
 #   St. Olaf's IT department
 library(RMariaDB)
@@ -167,13 +165,13 @@ First duplicate the plot above for 2023 data, then check trends across all origi
 - include `connection = ` and `output.var = ` in your sql chunk header (this doesn't seem to work with dbGetQuery()...)
 
 
-```{sql, connection = con, output.var = tester}
+```{sql, connection = con, output.var = "tester"}
 SELECT 
   origin, dest,
   SUM(1) AS count,
   AVG(cancelled) AS prop_cancelled
 FROM flightdata
-WHERE origin = 'JFK' OR origin = 'EWR' OR origin = 'LGA' AND year = 2013
+WHERE origin = 'JFK' OR origin = 'EWR' OR origin = 'LGA' AND year = 2023
 GROUP BY origin, dest
 HAVING prop_cancelled < 1;
 ```
@@ -183,6 +181,8 @@ tester |>
   ggplot(aes(count, prop_cancelled)) + 
   geom_point()
 ```
+
+im getting a little sick of just helping 
 
 3. [SKIP until the planes dataset becomes available] Produce a table of weighted plane age by carrier, where weights are based on number of flights per plane.  [This was #6 in 26_more_joins.Rmd.]
 
@@ -204,6 +204,21 @@ First duplicate the output above for 2023, then check trends across all origins.
 - remember that flights_nyc13 only contained 2013 and 3 NYC origin airports (EWR, JFK, LGA)
 - you'll have to merge the flights dataset with the planes dataset *when it becomes available*
 - you can use DISTINCT inside a COUNT()
+
+```{sql, connection = con}
+SELECT 
+  Reporting_Airline AS carrier,
+  a.name AS carrier_name,
+  COUNT(DISTINCT(tailnum)) AS unique_planes,
+  AVG(2024 - p.year) AS mean_weighted_age,
+  STDDEV_SAMP(2024 - p.year) AS sd_weighted_age
+FROM flightdata AS f
+JOIN planes AS p ON f.TAIL_NUMBER = p.tailnum
+JOIN airlines AS a ON f.Reporting_Airline = a.carrier
+WHERE origin IN ('JFK', 'EWR', 'LGA') AND f.year = 2023
+GROUP BY carrier
+ORDER BY mean_weighted_age ASC
+```
 
 
 ## On Your Own - Noninvasive Auditory Diagnostic Tools

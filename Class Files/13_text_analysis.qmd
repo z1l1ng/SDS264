@@ -1102,7 +1102,7 @@ potter_beta_wide |>
     labs(x = "Log ratio of Beta values",
          y = "Words in Potter Books")
 
-potter_documents <- tidy(potter_lda, matrix = "gamma")
+potter_documents <- tidy(potter_lda, matrix = "gamma")x
 
 # Find documents for each topic
 potter_documents |>

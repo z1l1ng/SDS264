@@ -1,0 +1,298 @@
+---
+title: "Animate plots with gganimate"
+output:
+  pdf_document: default
+  html_document: default
+subtitle: Stat 282A - Data Visualization
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+## Background
+
+One more pre-attentive processing task that we have not mentioned yet is motion. Motion is a powerful way to emphasize key features of a visualization. And we have several ways of using motion to draw the viewer's attention in the same "pre-attentive" way that color, similarity, and other methods we've discussed.
+
+- **Flicker**: Having key groups or features appear and/or disappear from the plot.
+
+- **Direction of motion**: Do certain groups move "against the stream" or behave otherwise differently than other points? Motion can really emphasize this effect.
+
+- **Velocity of motion**: Are the effects more extreme for certain points or groups? Again, seeing an animated version of these effects can leave a profound mark and tell your story without relying on additional annotations or other effects.
+
+### When to use
+
+Most often you will find that animation is useful when dealing with temporal data. What happens across time. But there are plenty of other instances when an animation can be helpful, when you are considering the effect of a range of values on a relationship, when comparing groups (ordinal groups can be the most effective), or even just a loop switching back and forth between two states.
+
+Here are the key features of `gganimate`
+
+- **transitions**: You want your data to change
+
+- **views**: you want your viewpoint to change
+
+- **shadows**: you want the animation to have memory
+
+
+```{r}
+#install.packages("gganimate")
+#install.packages("gifski")
+#install.packages("plotly")
+library(ggplot2)
+library(gganimate)
+library(gifski)
+library(plotly)
+library(gapminder)
+library(tidyverse)
+
+head(gapminder)
+```
+
+
+## Creating the animated plot
+
+### gganimate
+
+Let's recreate something similar to the Han's Rosling video. It's always a good idea to generate the static plot first, make sure you have the titles, colors, and features you want before animating it.
+
+1. Create a scatterplot (for all years) from the gapminder data with the following:
+
+- GDP per capita on the x-axis (or log GDP if you prefer)
+- Life expectancy on the y-axis
+- Size of circle for population
+- Color of circle for continent
+
+```{r}
+gapminder |> 
+  ggplot(aes(x = log(gdpPercap), y = lifeExp)) +
+  geom_point(aes(size = pop, color = continent)) 
+```
+
+
+2. The problem with this plot is that these are the GDPs and Life expectancy for all the countries over all the years. So this data is ripe for an animation, let's see how things can change. This is actually pretty easy with the `gganimate` package and the `transition` functions
+
+Add `transition_time(...)` to your static ggplot above to animate it to cycle through the years we have data. BONUS: Add a title that changes for each year along with the plot (something like "Year: 1952" then "Year: 1953", etc.)
+
+```{r}
+gapminder |> 
+  ggplot(aes(x = log(gdpPercap), y = lifeExp)) +
+  geom_point(aes(size = pop, color = continent), show.legend = FALSE) +
+  transition_time(year) +
+  labs(title = 'Year: {frame_time}')
+```
+
+3. Other visualization principles can also be incorporated such as faceting. (Be aware that patience may be needed as we are asking R to perform a lot of tasks here.)
+
+```{r}
+gapminder |> 
+  ggplot(aes(x = log(gdpPercap), y = lifeExp)) +
+  geom_point(aes(size = pop, color = continent), show.legend = FALSE) +
+  transition_time(year) +
+  facet_wrap(~continent) +
+  labs(title = 'Year: {frame_time}')
+
+```
+
+
+
+4. You can change the point of view using functions like `view_follow`. As well as show the history of the points using `shadow_`. Add `view_follow(fixed_y = TRUE)` to your ggplot from #2. (If you didn't use log GDP before, you may want to now.)
+
+In a different plot, find the three `shadow_` functions and see what each one does to your animation. Which one is your favorite?
+
+```{r}
+gapminder |> 
+  ggplot(aes(x = log(gdpPercap), y = lifeExp)) +
+  geom_point(aes(size = pop, color = continent), show.legend = FALSE) +
+  transition_time(year) +
+  facet_wrap(~continent) +
+  labs(title = 'Year: {frame_time}') +
+  shadow_wake(alpha = 0.3, wake_length = 0.5)
+```
+
+- shadow mark leaves points where the dots were 
+- shadow trail trace the movement in your animation by keeping every nth frame and will thus produce a breadcrumb-like trail
+- shadow wake draw a small wake after data by showing the latest frames up to the current
+
+Trail is my favorite
+
+### Plotly
+
+[Plotly](https://plotly.com/ggplot2/) is an awesome package that works really well with ggplot (also has packages for Python, Julia, Javascript, MATLAB, and more). Usually, if you can create a ggplot, you can give it some interactivity by just using `ggplotly()`
+
+5. Copy your static ggplot code from #1 above and save it as the object `p` below (after removing the `#`). Then turn it into a plotly plot and explore the result.
+
+```{r}
+p <- gapminder |> 
+  ggplot(aes(x = log(gdpPercap), y = lifeExp)) +
+  geom_point(aes(size = pop, color = continent)) 
+  
+ggplotly(p)
+```
+
+6. Animating a plotly graph is a matter of identifying the `frame`. Use the same code from the previous section and add a `frame` argument to the geom_point aesthetics.
+
+```{r}
+p <- gapminder |> 
+  ggplot(aes(x = log(gdpPercap), y = lifeExp)) +
+  geom_point(aes(size = pop, color = continent, frame = year))
+
+ggplotly(p)
+```
+
+
+7. There are extra options and features you can set directly through plotly. Run the code below to see what the "elastic" easing option does. You can find a list of easing options [here](https://github.com/plotly/plotly.js/blob/master/src/plots/animation_attributes.js) (list starts at line 68). Choose a couple to play around with.
+
+
+```{r}
+fig <- ggplotly(p)
+
+fig <- fig |>
+  animation_opts(
+    1000, easing = "elastic", redraw = FALSE
+    )
+
+fig
+```
+
+
+8. You can also move around the play button and provide a slider option for year, instead of automatic animation. Move the Play button around and add a slider for Year.
+
+```{r}
+fig <- fig |> 
+  animation_button(
+    x = 1, xanchor = "right", y = 0, yanchor = "bottom"
+    ) |>
+  animation_slider(
+    currentvalue = list(prefix = "YEAR ", font = list(color="red"))
+    )
+
+fig
+```
+
+
+## Data Reveal with gganimate
+
+Using the `airquality` dataset in base R - Daily air quality measurements in New York, May to September 1973.
+
+9. Create a line graph with:
+
+- Day of month on the x-axis
+- Temperature on the y-axis
+- Colored and grouped by Month
+- Don't worry too much about labels and titles for now
+
+```{r}
+airquality |>
+  ggplot(aes(x = Day, y = Temp, color = as.factor(Month))) +
+  geom_line(aes(group = Month))
+```
+
+```{r}
+head(airquality)
+
+```
+
+10. Add `transition_reveal(...)` to reveal the line by day of the month 
+
+```{r}
+airquality |>
+  ggplot(aes(x = Day, y = Temp, color = as.factor(Month))) +
+  geom_line(aes(group = Month)) +
+  transition_reveal(Day)
+```
+
+
+11. Add `geom_point()` (no arguments) to the animation to show a leading point on each line. Adding the `aes(group = seq_along(Day))` argument will show a history of points.
+
+```{r}
+airquality |>
+  ggplot(aes(x = Day, y = Temp, color = as.factor(Month), group = Month)) +
+  geom_line() +
+  geom_point() +
+  transition_reveal(Day)
+```
+
+## Data Transitions with gganimate
+
+12. Create a 5x2 tibble called `mean_temp` with mean temperature by month. Then run the code below to turn it into a static bar graph.
+
+```{r}
+## Create a data frame of average monthly temp
+mean_temp <- airquality |>
+  group_by(Month) |>
+  summarise(Temp = mean(Temp))
+
+## Static plot
+p3 <- ggplot(mean_temp, aes(x = Month, y = Temp, fill = Temp)) +
+  geom_col() +
+  scale_fill_distiller(palette = "Reds", direction = 1) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    panel.grid.major.y = element_line(color = "white"),
+    panel.ontop = TRUE
+  )
+p3
+
+```
+
+13. Add the `transition_states()` function to your code to reveal each monthly bar. You'll probably also want to add a `shadow_` option so you don't lose your bars!
+
+```{r}
+p3 +
+  transition_states(Month) +
+  shadow_mark()
+```
+
+
+## Exporting animated plots as gifs
+
+14. Use `anim_save()` to save as an .mp4 or .gif
+
+```{r}
+transition <- p3 +
+  transition_states(Month) +
+  shadow_trail()
+
+# anim_save("transition.gif", animation = transition, path = getwd())
+```
+
+
+## Create your own plots
+
+Can you use the world bank indicators data to create your own animated plots? Try to create at least one or two plots using the following variables (or others if you like):
+
+- Country
+
+- Region
+
+- Year (for animation)
+
+- CO2 emmission
+
+- Fertility rate
+
+- GDP poer capita
+
+- Life expectancy
+
+- Internet users
+
+- Total population
+
+If you're stuck on where to begin, a good place to start would be trying to recreate the animated Tableau plot from our last lab about Internet users (x-axis), Life expectancy (y-axis), Fertility rate (size), and region (color) for the years 1991 to 2014.
+
+```{r}
+world_indicators <- read_csv("https://raw.githubusercontent.com/joeroith/Data/master/WorldBank-indicators.csv")
+world_regions <- read_csv("https://raw.githubusercontent.com/joeroith/Data/master/WorldBank-regions.csv")
+
+world_data <- world_indicators |> left_join(world_regions, by = "Country")
+
+world_data
+```
+
+```{r}
+
+```
+
